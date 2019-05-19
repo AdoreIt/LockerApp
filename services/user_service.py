@@ -8,6 +8,7 @@ class User:
 class UserService:
     def __init__(self):
         self.users = []
+        # TODO: self.cursor - some postrges
 
     # ----------- Locker connection logic -----------
 
@@ -21,6 +22,9 @@ class UserService:
 
     # ----------- DB logic -----------
 
+    def __connect_to_db(self):
+        """ Connection to users_db logic """
+
     def __send_to_users_db(self, sql_query):
         """ 
         Send request to Postgres Users DB 
@@ -31,7 +35,7 @@ class UserService:
         " - parse logic "
 
         user_locker_id_dict = dict(
-            user="user_name_from_db",
+            user_name="user_name_from_db",
             locker_id="locker_id_from_db")  # = cursor.blabla
         return user_locker_id_dict
 
@@ -50,13 +54,13 @@ class UserService:
 
     def __is_user_exists(self, dict):
         # TODO: discuss what DB will return in case of user not exists
-        if (dict["user"] == None):
+        if (dict["user_name"] == None):
             return False
         else:
             return True
 
     def __is_locker_assigned(self, dict):
-        # TODO: discuss what DB will return in case of locker_id epmty
+        # TODO: discuss what DB will return in case of locker_id empty
         if (dict["locker_id"] == None):
             return False
         else:
@@ -73,14 +77,23 @@ class UserService:
         if self.__is_user_exists:
             if self.__is_locker_assigned:
                 self.__send_answer_to_ui(
-                    self.__form_msg_to_ui("message", user_locker_id_dict))
+                    self.__form_msg_to_ui("{0} - locker number: {1}".format(
+                        user_locker_id_dict['user_name'],
+                        user_locker_id_dict['locker_id'])))
+            else:
+                self.__send_answer_to_ui(__send_to_locker_service("Get locker_id")
+        else:
+            __send_to_users_db()
 
     # ----------- FROM UI -----------
 
     # ----------- TO UI -----------
 
-    def __form_msg_to_ui(self, message, dict):
-        """ concatenate message & dict """
+    def __form_msg_to_ui(self, message, dict=None):
+        """
+        maybe will not be needed 
+        concatenate message & dict 
+        """
         #final_message = message + dict
         #return message
 
