@@ -6,4 +6,3 @@ CREATE TABLE clients_lockers
 );
 ALTER TABLE clients_lockers
   OWNER TO cvmasters;
-
