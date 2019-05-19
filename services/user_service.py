@@ -7,19 +7,23 @@ class User:
 
 class UserService:
     def __init__(self):
-        self.users = []
-        # TODO: self.cursor - some postrges
+        """ basic initializing """
+        # TODO: self.users = [] ? think whether this is needed
+        # TODO: self.cursor - some postgress
 
+    # -----------------------------------------------
     # ----------- Locker connection logic -----------
 
     def __send_to_locker_service(self, message):
-        """ rabbitqm logic of sending messages """
+        """ Publisher rabbitqm logic of sending messages """
 
     def __receive_from_locker_service(self):
-        """ rabbitmq logic of receiving messages """
+        """ Listener rabbitmq logic of receiving messages """
 
     # ----------- Locker connection logic -----------
+    # -----------------------------------------------
 
+    # --------------------------------
     # ----------- DB logic -----------
 
     def __connect_to_db(self):
@@ -34,23 +38,26 @@ class UserService:
         " - request logic"
         " - parse logic "
 
+        # TODO: decide to usu User class or dict
         user_locker_id_dict = dict(
-            user_name="user_name_from_db",
+            user_name="user_name_from_db",  #User.id
             locker_id="locker_id_from_db")  # = cursor.blabla
         return user_locker_id_dict
 
-    # def __receive_from_users_db(self, sql_query):
-    #     """ Mongo logic on receiving messages from DB """
+    def __receive_from_users_db(self, sql_query):
+        """ Postgress logic on receiving messages from DB """
+        # TODO: deside whether this function
 
     # ----------- DB logic -----------
+    # --------------------------------
 
-    # def __user_name(self):
-    #     """
-    #     Get unique user id from Mongo Users DB
-    #     __send_to_users_db will be called
-    #     """
-
-    #     # SELECT query to check if
+    def __add_user(self, name):
+        """
+        __send_to_users_db will be called
+        """
+        # TODO: change INSERT query
+        sql_query = "INSERT query to add user to db"
+        self.__send_to_users_db(sql_query)
 
     def __is_user_exists(self, dict):
         # TODO: discuss what DB will return in case of user not exists
@@ -66,7 +73,9 @@ class UserService:
         else:
             return True
 
+    # -------------------------------
     # ----------- FROM UI -----------
+
     def __on_check_button_clicked(self, name):
         """ make request to DB with name """
 
@@ -81,12 +90,21 @@ class UserService:
                         user_locker_id_dict['user_name'],
                         user_locker_id_dict['locker_id'])))
             else:
-                self.__send_answer_to_ui(__send_to_locker_service("Get locker_id")
+                # TODO: discuss what message to send to locker to get locker_id
+                self.__send_to_locker_service("Get locker_id")
+                # TODO: deside how to receive locker_id (from which function)
+                # TODO: __send_answer_to_ui send to UI user: locker_id
         else:
-            __send_to_users_db()
+            self.__add_user(name)
+            # TODO: discuss what message to send to locker to get locker_id
+            self.__send_to_locker_service("Get locker_id")
+            # TODO: deside how to receive locker_id (from which function)
+            # TODO: __send_answer_to_ui user: locker_id
 
     # ----------- FROM UI -----------
+    # -------------------------------
 
+    # -----------------------------
     # ----------- TO UI -----------
 
     def __form_msg_to_ui(self, message, dict=None):
@@ -101,6 +119,8 @@ class UserService:
         """ send to ui logic """
 
     # ----------- TO UI -----------
+    # -----------------------------
+
     def start(self):
         """ Start UserService """
 
