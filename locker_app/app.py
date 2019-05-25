@@ -1,4 +1,6 @@
-from flask import Flask, render_template
+import requests
+import json
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -10,9 +12,28 @@ def home():
     return render_template("home.html")
 
 
-@app.route('/users')
+@app.route('/users', methods=['GET'])
 def users():
-    return render_template("users.html")
+    error = None
+    resp = None
+    try:
+        print("requesting from UserService")
+        resp = requests.get(
+            'http://192.168.43.136:5010/users_service',
+            data={'hello': "UserService"})
+        print("response: " + resp.text)
+    except:
+        error = "Service temporary unavailable. Please, try later"
+        return render_template("users.html", error=error)
+
+    if resp.status_code == 200:
+        print("Loading response from UserService")
+        resp = json.loads(resp.text)
+        data = "Hello " + resp['hello'] + " World!"
+        return render_template("users.html", data=data)
+    else:
+        error = "No Hello World for you >:|"
+        return render_template("users.html", error=error)
 
 
 @app.route('/lockers')
@@ -21,4 +42,4 @@ def lockers():
 
 
 if __name__ == "__main__":
-    app.run(host="192.168.43.76", port="5000", debug=True)
+    app.run(host="192.168.43.136", port="5000", debug=True)
