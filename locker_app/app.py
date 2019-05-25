@@ -19,7 +19,7 @@ def users():
     try:
         print("requesting from UserService")
         resp = requests.get(
-            'http://192.168.43.136:5010/users_service',
+            'http://192.168.43.76:5010/users_service',
             data={'hello': "UserService"})
         print("response: " + resp.text)
     except:
@@ -36,10 +36,29 @@ def users():
         return render_template("users.html", error=error)
 
 
-@app.route('/lockers')
+@app.route('/lockers', methods=['GET'])
 def lockers():
-    return render_template("lockers.html")
+    error = None
+    resp = None
+    try:
+        print("requesting from LockerService")
+        resp = requests.get(
+            'http://192.168.43.76:5020/locker_service',
+            data={'hello': "LockerService"})
+        print("response: " + resp.text)
+    except:
+        error = "Service temporary unavailable. Please, try later"
+        return render_template("lockers.html", error=error)
+
+    if resp.status_code == 200:
+        print("Loading response from LockerService")
+        resp = json.loads(resp.text)
+        data = "Hello " + resp['hello'] + " World!"
+        return render_template("lockers.html", data=data)
+    else:
+        error = "No Hello World for you >:|"
+        return render_template("lockers.html", error=error)
 
 
 if __name__ == "__main__":
-    app.run(host="192.168.43.136", port="5000", debug=True)
+    app.run(host="192.168.43.76", port="5000", debug=True)

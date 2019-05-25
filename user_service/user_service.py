@@ -22,4 +22,4 @@ class UserService(Resource):
 
 api.add_resource(UserService, '/users_service')
 if __name__ == '__main__':
-    app.run(host="192.168.43.136", port="5010", debug=True)
+    app.run(host="192.168.43.76", port="5010", debug=True)
