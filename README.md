@@ -4,7 +4,7 @@ Distributed system project
 1. [Basic architecture](#architecture)
 
 ## Basic architecture <a name="architecture"></a>
-![](https://github.com/AdoreIt/cv_masters_lockers/blob/master/architecture_diagram.png?raw=true)
+![](https://github.com/AdoreIt/cv_masters_lockers/blob/master/doc/architecture_diagram.png?raw=true)
 
 ## Databases installation, configuration and creation
 
