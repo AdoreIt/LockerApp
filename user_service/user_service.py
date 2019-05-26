@@ -11,7 +11,11 @@ class UserService(Resource):
         print("Trying")
         try:
             print("try")
-            answer = request.form['hello']
+            # TODO: Substitute dummy dictionary with DB data
+            answer = {"User Ann": "Locker 1",
+                      "User Olga": "Locker 3",
+                      "User Natalie": "No locker assigned",
+                      "User Alice": "Locker 2"}
             print(answer)
             result = {'hello': answer}
             return result, 200

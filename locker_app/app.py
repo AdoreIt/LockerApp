@@ -29,7 +29,7 @@ def users():
     if resp.status_code == 200:
         print("Loading response from UserService")
         resp = json.loads(resp.text)
-        data = "Hello " + resp['hello'] + " World!"
+        data = resp['hello']
         return render_template("users.html", data=data)
     else:
         error = "No Hello World for you >:|"
