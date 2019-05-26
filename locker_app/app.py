@@ -70,8 +70,8 @@ def lockers():
     resp = None
     try:
         print("LockerApp: requesting from LockerService")
-        resp = requests.get('http://192.168.43.76:5020/locker_service',
-                            data={'hello': "LockerService"})
+        resp = requests.get('http://192.168.43.136:5020/locker_service',
+                            data={'lockers': "LockerService"})
         print("LockerApp got response: " + resp.text)
     except:
         error = "Service temporary unavailable. Please, try later"
@@ -80,7 +80,7 @@ def lockers():
     if resp.status_code == 200:
         print("LockerApp: Loading response from LockerService")
         resp = json.loads(resp.text)
-        data = resp['hello']
+        data = resp['lockers']
         return render_template("lockers.html", data=data)
     else:
         error = "No Hello World for you >:|"
