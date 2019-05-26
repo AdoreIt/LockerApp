@@ -4,13 +4,50 @@ Distributed system project
 ![](https://github.com/AdoreIt/LockerApp/blob/master/doc/LockerApp.gif?raw=true)
 
 1. [Basic architecture](#architecture)
+2. [Installs](#installs)
+   1. [Conda enviroment](#conda_environment)
+   2. [Databases](#databases)
+      1. [PostgreSQL](#postgresql)
+      2. [MongoDB](#mongodb)
+   3. [RabbitMQ](#rabbitmq)
+3. [Launching](#launching)
+
 
 ## Basic architecture <a name="architecture"></a>
 ![](https://github.com/AdoreIt/LockerApp/blob/master/doc/architecture_diagram.png?raw=true)
 
-## Databases installation, configuration and creation
+## Installs  <a name="installs"></a>
+### Conda environment  <a name="conda_environment"></a>
 
-#### PostgreSQL
+<details>
+  <summary>Click to expand!</summary>
+
+Create an environment and activate it
+```
+conda create --name p36_lockerapp python=3.6
+conda activate p36_lockerapp
+```
+
+Flask and RestAPI
+```
+pip install flask
+pip install flask-restful
+```
+
+RabbitMQ
+```
+conda install -c conda-forge rabbitmq-server
+conda install -c conda-forge pika
+```
+
+</details>
+
+
+### Databases installation, configuration and creation <a name="databases"></a>
+
+#### PostgreSQL <a name="postgresql"></a>
+<details>
+  <summary>Click to expand!</summary>
 
 ##### Install PostgreSQL on Ubuntu:
 `sudo apt update`
@@ -29,7 +66,11 @@ Distributed system project
 ##### Drop Database
 `cd user_service/psql_db && ./drop_psql_db.sh`
 
-#### MongoDB
+</details>
+
+#### MongoDB <a name="mongodb"></a>
+<details>
+  <summary>Click to expand!</summary>
 
 ##### Install MongoDB on Ubuntu:
 `sudo apt update`
@@ -47,3 +88,9 @@ Distributed system project
 
 ##### Drop Database
 `cd locker_service/mongo_db && bash drop_mongo_db.sh`
+
+</details>
+
+### RabbitQM  <a name="rabbitmq"></a>
+
+## Launching  <a name="launching"></a>
