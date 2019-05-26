@@ -7,7 +7,13 @@ api = Api(app)
 
 
 def get_users_lockers_dict():
-    return {"Ann": 1, "Olha": 2, "Natalie": None, "Alice": 3}
+    """
+    Getting users from DB and returning in dict format:
+    dict = {1: True, 2: False, ...}
+    TODO: Substitute dummy dictionary with DB data
+    """
+    users_lockers = {"Ann": 1, "Olha": 2, "Natalie": None, "Alice": 3}
+    return users_lockers
 
 
 def get_users_locker(user_name):
@@ -31,7 +37,7 @@ class Users(Resource):
             users_answer = {'users': users}
 
             print("Users: sending answer")
-            return users_answer, 404
+            return users_answer, 200
         except:
             print("Users: troubles")
             return 'Cannot connect to users db', 404
