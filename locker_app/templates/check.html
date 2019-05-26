@@ -1,0 +1,29 @@
+{% extends 'home.html' %}
+
+{% block check %}
+
+{% if success %}
+<div class="alert alert-success">
+    <strong>Success!</strong> {{ success }}
+</div>
+{% endif %}
+
+{% if info %}
+<div class="alert alert-info">
+    <strong>Info!</strong> {{ info }}
+</div>
+{% endif %}
+
+{% if warning %}
+<div class="alert alert-warning">
+    <strong>Warning!</strong> {{ warning }}
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-danger">
+    <strong>Error!</strong> {{ error }}
+</div>
+{% endif %}
+
+{% endblock %}

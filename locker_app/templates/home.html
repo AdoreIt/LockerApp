@@ -3,12 +3,14 @@
 {% block body %}
 <div class="container">
     <form action="" method="post" role="form">
-    <div class="input-group mb-3    ">
+    <div class="input-group mb-3">
         <input type="text" class="form-control" id="name" name="name" placeholder="Type user name..." aria-describedby="basic-addon2">
         <div class="input-group-append">
-            <button class="btn btn-success" type="button">Check</button>
+            <input type="submit" action="/check" method="post" class="btn btn-success" name="check">
         </div>    
     </div>
     </form>
+    {% block check %}{% endblock %}
 </div>
+
 {% endblock %}
