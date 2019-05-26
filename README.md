@@ -24,10 +24,10 @@ Distributed system project
 `sudo service postgresql start`
 
 ##### Create Database:
-`cd dbs && ./create_psql_db.sh`
+`cd user_service/psql_db && ./create_psql_db.sh`
 
 ##### Drop Database
-`cd dbs && ./drop_psql_db.sh`
+`cd user_service/psql_db && ./drop_psql_db.sh`
 
 #### MongoDB
 
@@ -43,7 +43,7 @@ Distributed system project
 `sudo service mongodb start`
 
 ##### Create Database
-`cd dbs && bash create_mongo_db.sh`
+`cd locker_service/mongo_db && bash create_mongo_db.sh`
 
 ##### Drop Database
-`cd dbs && bash drop_mongo_db.sh`
+`cd locker_service/mongo_db && bash drop_mongo_db.sh`
