@@ -1,9 +1,27 @@
+import pika
 import requests
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 
 app = Flask(__name__)
 api = Api(app)
+
+credentials = pika.PlainCredentials('lockerapp', 'lockerapp')
+
+
+def get_locker_from_locker_service(queue_name='get_locker_id', message=''):
+    print("UserService: connecting to RabbitMQ")
+
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(credentials=credentials))
+    channel = connection.channel()
+
+    channel.queue_declare(queue=queue_name, durable=True)
+
+    channel.basic_publish(exchange='', routing_key=queue_name, body=message)
+    print("UserService - RabbitMQ sent:  ", message)
+
+    connection.close()
 
 
 def get_users_lockers_dict():
@@ -23,6 +41,7 @@ def get_users_locker(user_name):
         if locker is not None:
             return locker
         else:
+            get_locker_from_locker_service(message="get_locker_id")
             return "user without locker"
     else:
         return "user not exists"
@@ -50,6 +69,12 @@ class UserService(Resource):
             print("UserService: trying to get user's locker")
             user_name_req = request.form['user_name']
             # TODO: Substitute dummy dictionary with DB data
+            # TODO: Change request structure to:
+            # request_structure = {
+            #     'request_message': "message from with req to do smth",
+            #     'data': 'data'
+            # }
+
             users_locker = get_users_locker(user_name_req)  # answer
 
             print("UserService: ", users_locker)
