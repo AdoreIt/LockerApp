@@ -41,43 +41,51 @@ conda install -c conda-forge pika
 
 #### PostgreSQL <a name="postgresql"></a>
 
-##### Install PostgreSQL on Ubuntu:
+Install PostgreSQL on Ubuntu:
 ```
 sudo apt update
 sudo apt-get install postgresql libpq-dev postgresql-client postgresql-client-common
 ```
 
-##### Install python lib (can be succesfully executed only if PostgreSQL is already installed):
+Install python lib (can be succesfully executed only if PostgreSQL is already installed):
+
 `pip install psycopg2`
 
-##### Start PostgreSQL server (Required before running the app):
+Start PostgreSQL server (Required before running the app):
+
 `sudo service postgresql start`
 
-##### Create Database:
+Create Database:
+
 `cd user_service/psql_db && ./create_psql_db.sh`
 
-##### Drop Database
+Drop Database:
+
 `cd user_service/psql_db && ./drop_psql_db.sh`
 
 
 #### MongoDB <a name="mongodb"></a>
 
-##### Install MongoDB on Ubuntu:
+Install MongoDB on Ubuntu:
 ```
 sudo apt update
 sudo apt install -y mongodb
 ```
 
-##### Install python lib:
+Install python lib:
+
 `python -m pip install pymongo`
 
-##### Start MongoDB server:
+Start MongoDB server:
+
 `sudo service mongodb start`
 
-##### Create Database
+Create Database:
+
 `cd locker_service/mongo_db && bash create_mongo_db.sh`
 
-##### Drop Database
+Drop Database:
+
 `cd locker_service/mongo_db && bash drop_mongo_db.sh`
 
 
