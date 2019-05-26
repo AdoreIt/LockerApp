@@ -9,7 +9,7 @@ api = Api(app)
 def get_users_lockers_dict():
     """
     Getting users from DB and returning in dict format:
-    dict = {1: True, 2: False, ...}
+    dict = {"Ann": None, "Olha": 1, ...}
     TODO: Substitute dummy dictionary with DB data
     """
     users_lockers = {"Ann": 1, "Olha": 2, "Natalie": None, "Alice": 3}
@@ -50,7 +50,7 @@ class UserService(Resource):
             print("UserService: trying to get user's locker")
             user_name_req = request.form['user_name']
             # TODO: Substitute dummy dictionary with DB data
-            users_locker = get_users_locker(user_name_req)  #answer
+            users_locker = get_users_locker(user_name_req)  # answer
 
             print("UserService: ", users_locker)
             result = {'users_locker': users_locker}
