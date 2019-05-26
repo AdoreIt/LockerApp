@@ -11,7 +11,11 @@ class LockerService(Resource):
         print("Trying")
         try:
             print("try")
-            answer = request.form['hello']
+            # TODO: Substitute dummy dictionary with DB data
+            answer = {"Locker 1": "Free",
+                      "Locker 2": "Busy",
+                      "Locker 3": "Empty",
+                      "Locker 4": "Empty"}
             print(answer)
             result = {'hello': answer}
             return result, 200
