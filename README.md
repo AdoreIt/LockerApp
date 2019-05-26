@@ -19,9 +19,6 @@ Distributed system project
 ## Installs  <a name="installs"></a>
 ### Conda environment  <a name="conda_environment"></a>
 
-<details>
-  <summary>Click to expand!</summary>
-
 Create an environment and activate it
 ```
 conda create --name p36_lockerapp python=3.6
@@ -40,19 +37,15 @@ conda install -c conda-forge rabbitmq-server
 conda install -c conda-forge pika
 ```
 
-</details>
-
-
 ### Databases installation, configuration and creation <a name="databases"></a>
 
 #### PostgreSQL <a name="postgresql"></a>
-<details>
-  <summary>Click to expand!</summary>
 
 ##### Install PostgreSQL on Ubuntu:
-`sudo apt update`
-
-`sudo apt-get install postgresql libpq-dev postgresql-client postgresql-client-common`
+```
+sudo apt update
+sudo apt-get install postgresql libpq-dev postgresql-client postgresql-client-common
+```
 
 ##### Install python lib (can be succesfully executed only if PostgreSQL is already installed):
 `pip install psycopg2`
@@ -66,16 +59,14 @@ conda install -c conda-forge pika
 ##### Drop Database
 `cd user_service/psql_db && ./drop_psql_db.sh`
 
-</details>
 
 #### MongoDB <a name="mongodb"></a>
-<details>
-  <summary>Click to expand!</summary>
 
 ##### Install MongoDB on Ubuntu:
-`sudo apt update`
-
-`sudo apt install -y mongodb`
+```
+sudo apt update
+sudo apt install -y mongodb
+```
 
 ##### Install python lib:
 `python -m pip install pymongo`
@@ -89,7 +80,6 @@ conda install -c conda-forge pika
 ##### Drop Database
 `cd locker_service/mongo_db && bash drop_mongo_db.sh`
 
-</details>
 
 ### RabbitQM  <a name="rabbitmq"></a>
 
