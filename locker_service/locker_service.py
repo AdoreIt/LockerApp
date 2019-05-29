@@ -1,7 +1,13 @@
+import sys, os
+
 import requests
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 
+sys.path.append(os.path.abspath(os.path.join('config')))
+from config import read_config
+
+config = read_config()
 app = Flask(__name__)
 api = Api(app)
 
@@ -33,4 +39,7 @@ class LockerService(Resource):
 
 api.add_resource(LockerService, '/locker_service')
 if __name__ == '__main__':
-    app.run(host="192.168.43.136", port="5020", debug=True)
+    app.run(
+        host=config.locker_service_ip,
+        port=config.locker_service_port,
+        debug=True)

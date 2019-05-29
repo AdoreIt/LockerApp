@@ -1,8 +1,14 @@
+import sys, os
+
 import pika
 import requests
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 
+sys.path.append(os.path.abspath(os.path.join('config')))
+from config import read_config
+
+config = read_config()
 app = Flask(__name__)
 api = Api(app)
 
@@ -90,4 +96,5 @@ class UserService(Resource):
 api.add_resource(Users, '/users')
 api.add_resource(UserService, '/users_service')
 if __name__ == '__main__':
-    app.run(host="192.168.43.136", port="5010", debug=True)
+    app.run(
+        host=config.user_service_ip, port=config.user_service_port, debug=True)
