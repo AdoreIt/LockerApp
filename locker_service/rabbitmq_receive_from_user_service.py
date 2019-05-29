@@ -4,7 +4,7 @@ import json
 
 import pika
 from requests import post
-from locker_service import get_lockers_from_db, update_lockers_db
+from locker_service import update_lockers_db, get_empty_locker_from_db
 
 sys.path.append(os.path.abspath(os.path.join('config')))
 from config import read_config
@@ -24,27 +24,25 @@ def callback(ch, method, properties, body):
     body = str(body.decode("utf-8"))
     print("LockerService - RabbitMQ received: ", body)
     print("LockerService is searching for empty locker")
-    lockers_dict = get_lockers_from_db()
-    for locker_id, is_empty in lockers_dict.items():
-        if is_empty:
-            try:
-                print("LockerService: trying to send empty locker id")
-                data = {"user_name": body, "locker_id": str(locker_id)}
-                print(data)
-                resp = post('http://{}:{}/user_locker'
-                            .format(config.user_service_ip,
-                                    config.user_service_port),
-                            data=data)
-                update_lockers_db(locker_id, False)
-                if resp.status_code == 200:
-                    print('LockerService: posted to UserService locker id: ',
-                          data)
-                    return
-                else:
-                    print('LockerService: Cannot make POST locker_id')
-            except:
-                print("LockerService: Failed to send locker id")
+    locker_id = get_empty_locker_from_db()
+    if locker_id:
+        try:
+            print("LockerService: trying to send empty locker id")
+            data = {"user_name": body, "locker_id": str(empty_locker_id)}
+            resp = post('http://{}:{}/user_locker'
+                        .format(config.user_service_ip,
+                                config.user_service_port),
+                        data=data)
+            update_lockers_db(empty_locker_id, False)
+            if resp.status_code == 200:
+                print('LockerService: posted to UserService locker id: ',
+                      data)
                 return
+            else:
+                print('LockerService: Cannot make POST locker_id')
+        except:
+            print("LockerService: Failed to send locker id")
+            return
     data = {"user_name": body, "locker_id": "no_lockers"}
     print(data)
     try:
