@@ -106,6 +106,7 @@ Create file `rabbitmq-env.conf` with the next line:
 ```
 rabbit01$ vim conda/envs/env_name/etc/rabbitmq-env.conf
 NODENAME=rabbit@rabbit01
+
 rabbit02$ vim conda/envs/env_name/etc/rabbitmq-env.conf
 NODENAME=rabbit@rabbit02
 ```
@@ -124,6 +125,7 @@ rabbit01$ rabbitmqctl cluster_status
 Cluster status of node rabbit@rabbit01 ...
 [{nodes,[{disc,[rabbit@rabbit01]}]},{running_nodes,[rabbit@rabbit01]}]
 ...done.
+
 rabbit02$ rabbitmqctl cluster_status
 Cluster status of node rabbit@rabbit02 ...
 [{nodes,[{disc,[rabbit@rabbit02]}]},{running_nodes,[rabbit@rabbit02]}]
@@ -134,8 +136,10 @@ Create the cluster
 ```
 rabbit02$ rabbitmqctl stop_app
 Stopping node rabbit@rabbit02 ...done.
+
 rabbit02$ rabbitmqctl join_cluster rabbit@rabbit01
 Clustering node rabbit@rabbit02 with [rabbit@rabbit01] ...done.
+
 rabbit02$ rabbitmqctl start_app
 Starting node rabbit@rabbit02 ...done.
 ```
@@ -163,8 +167,11 @@ Launch UserService:
 `python user_service/user_service.py`
 
 Launch RabbitMQ cluster (two nodes from different computers whose ip adresses are specified in `/etc/hosts`):
+```
+rabbit01$ rabbitmq-server
 
-`rabbitmq-server`
+rabbit02$ rabbitmq-server
+```
 
 Launch RabbitMQ receiver for LockerService:
 
