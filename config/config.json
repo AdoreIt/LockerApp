@@ -10,5 +10,9 @@
     "user_service": {
         "ip": "172.17.0.142",
         "port": "5020"
+    },
+    "rabbitmq": {
+        "username": "lockerapp_work",
+        "password": "lockerapp_work"
     }
 }

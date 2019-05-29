@@ -1,9 +1,17 @@
-import pika
+import sys, os
 import json
+
+import pika
 from requests import post
 from locker_service import get_lockers_from_db
 
-credentials = pika.PlainCredentials('lockerapp', 'lockerapp')
+sys.path.append(os.path.abspath(os.path.join('config')))
+from config import read_config
+
+config = read_config()
+
+credentials = pika.PlainCredentials(config.rabbitmq_username,
+                                    config.rabbitmq_password)
 connection = pika.BlockingConnection(
     pika.ConnectionParameters(credentials=credentials))
 channel = connection.channel()

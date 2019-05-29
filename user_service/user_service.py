@@ -12,7 +12,8 @@ config = read_config()
 app = Flask(__name__)
 api = Api(app)
 
-credentials = pika.PlainCredentials('lockerapp', 'lockerapp')
+credentials = pika.PlainCredentials(config.rabbitmq_username,
+                                    config.rabbitmq_password)
 
 
 def get_locker_from_locker_service(queue_name='get_locker_id', message=''):
@@ -89,8 +90,8 @@ class UserService(Resource):
             print("UserService: sending answer")
             return result, 200
         except:
-            print("UserService: 'Cannot connect to users db'")
-            return 'Cannot connect to users db', 404
+            print("UserService: 'Cannot connect to locker service'")
+            return 'Cannot connect to locker service', 404
 
 
 api.add_resource(Users, '/users')
