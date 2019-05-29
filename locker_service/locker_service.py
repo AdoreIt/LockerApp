@@ -18,8 +18,31 @@ def get_lockers_from_db():
     dict = {1: True, 2: False, ...}
     TODO: Substitute dummy dictionary with DB data
     """
-    lockers_dict = {1: True, 2: False, 3: True, 4: True, 5: True, 6: False}
+    lockers_dict = {1: False, 2: True, 3: False, 4: False, 5: False, 6: False}
     return lockers_dict
+
+
+def update_lockers_db(locker_id, is_empty):
+    """
+    Update instance in lockers DB
+    TODO: Substitute dummy dictionary with DB data
+    """
+    lockers_dict = get_lockers_from_db()
+    lockers_dict[locker_id] = is_empty
+
+
+def get_empty_locker_from_db():
+    """
+    Select locker_id from DB where is_empty = True
+    Choose one of them
+    If there are no empty lockers, return None
+    TODO: Substitute dummy dictionary with DB data
+    """
+    lockers_dict = get_lockers_from_db()
+    for locker_id, is_empty in lockers_dict:
+        if is_empty:
+            return locker_id
+    return None
 
 
 class LockerService(Resource):

@@ -24,6 +24,8 @@ def check():
     no_user_message = None
     no_locker_message = None
     error = None
+    new_locker_message = None
+    no_new_locker = None
 
     name = request.form.get("name", "")
     resp = requests.get(
@@ -39,6 +41,21 @@ def check():
             no_user_message = "User {} doesn't exist".format(name)
         elif locker_answer == "user without locker":
             no_locker_message = "User {} has no locker".format(name)
+            resp = requests.get(
+                'http://{0}:{1}/users_service'.format(config.user_service_ip,
+                                                      config.user_service_port),
+                data={"user_name": name})
+            if resp.status_code == 200:
+                resp = json.loads(resp.text)
+                locker_answer = resp["users_locker"]
+                print("LOCKER ANSWER", locker_answer)
+                if locker_answer == "user without locker":
+                    no_new_locker = "All lockers are busy"
+                else:
+                    new_locker_message = "User {} occupies locker {}".format(
+                        name, locker_answer)
+            elif resp.status_code == 404:
+                error = resp.text
         else:
             message = "User {} occupies locker {}".format(name, locker_answer)
     elif resp.status_code == 404:
@@ -49,7 +66,9 @@ def check():
         success=message,
         info=no_locker_message,
         warning=no_user_message,
-        error=error)
+        error=error,
+        new_locker_message=new_locker_message,
+        no_new_locker=no_new_locker)
 
 
 @app.route('/users', methods=['GET'])
