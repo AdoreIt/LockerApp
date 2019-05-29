@@ -1,7 +1,13 @@
-import requests
+import sys, os
 import json
+
+import requests
 from flask import Flask, render_template, request, redirect, url_for
 
+sys.path.append(os.path.abspath(os.path.join('config')))
+from config import read_config
+
+config = read_config()
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['SECRET_KEY'] = '2'
@@ -20,8 +26,10 @@ def check():
     error = None
 
     name = request.form.get("name", "")
-    resp = requests.get('http://192.168.43.136:5010/users_service',
-                        data={"user_name": name})
+    resp = requests.get(
+        'http://{0}:{1}/users_service'.format(config.user_service_ip,
+                                              config.user_service_port),
+        data={"user_name": name})
 
     if resp.status_code == 200:
         resp = json.loads(resp.text)
@@ -36,10 +44,12 @@ def check():
     elif resp.status_code == 404:
         error = resp.text
 
-    return render_template("check.html", success=message,
-                           info=no_locker_message,
-                           warning=no_user_message,
-                           error=error)
+    return render_template(
+        "check.html",
+        success=message,
+        info=no_locker_message,
+        warning=no_user_message,
+        error=error)
 
 
 @app.route('/users', methods=['GET'])
@@ -48,7 +58,8 @@ def users():
     resp = None
     try:
         print("LockerApp: requesting from UserService")
-        resp = requests.get('http://192.168.43.136:5010/users')
+        resp = requests.get('http://{0}:{1}/users'.format(
+            config.user_service_ip, config.user_service_port))
         print("LockerApp got response: " + resp.text)
     except:
         error = "Service temporary unavailable. Please, try later"
@@ -70,8 +81,10 @@ def lockers():
     resp = None
     try:
         print("LockerApp: requesting from LockerService")
-        resp = requests.get('http://192.168.43.136:5020/locker_service',
-                            data={'lockers': "LockerService"})
+        resp = requests.get(
+            "http://{0}:{1}/locker_service".format(config.locker_service_ip,
+                                                   config.locker_service_port),
+            data={'lockers': "LockerService"})
         print("LockerApp got response: " + resp.text)
     except:
         error = "Service temporary unavailable. Please, try later"
@@ -88,4 +101,4 @@ def lockers():
 
 
 if __name__ == "__main__":
-    app.run(host="192.168.43.76", port="5000", debug=True)
+    app.run(host=config.locker_app_ip, port=config.locker_app_port, debug=True)
