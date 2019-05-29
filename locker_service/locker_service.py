@@ -1,11 +1,12 @@
-import sys, os
+from config import read_config
+import sys
+import os
 
 import requests
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 
 sys.path.append(os.path.abspath(os.path.join('config')))
-from config import read_config
 
 config = read_config()
 app = Flask(__name__)
@@ -19,6 +20,15 @@ def get_lockers_from_db():
     TODO: Substitute dummy dictionary with DB data
     """
     lockers_dict = {1: True, 2: False, 3: True, 4: True, 5: True, 6: False}
+    return lockers_dict
+
+
+def update_lockers_db(locker_id, is_empty):
+    """
+    Update instance in lockers DB
+    """
+    lockers_dict = get_lockers_from_db()
+    lockers_dict.locker_id = is_empty
     return lockers_dict
 
 
