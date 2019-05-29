@@ -33,9 +33,30 @@ def get_locker_from_locker_service(queue_name='get_locker_id', message=''):
     connection.close()
 
 
-def get_users_lockers_dict():
+def add_user_to_db(user_name):
     """
-    Getting users from DB and returning in dict format:
+    Adding user with name user_name to db
+    """
+
+
+def delete_user_from_db(user_name):
+    """
+    Delete user with name user_name from db
+    """
+
+
+def update_locker_for_user_in_db(user_name, locker_id):
+    """
+    Update user with new locker_id (locker_id can be id or None)
+    """
+    BD[user_name] = locker_id
+    print("UserLocker: adding locker_id {} for user {}".format(
+        locker_id, user_name))
+
+
+def get_users_lockers_dict_from_db():
+    """
+    Getting users and their lockers from DB and returning in dict format:
     dict = {"Ann": None, "Olha": 1, ...}
     TODO: Substitute dummy dictionary with DB data
     """
@@ -44,7 +65,7 @@ def get_users_lockers_dict():
 
 
 def get_users_locker(user_name):
-    users_lockers = get_users_lockers_dict()
+    users_lockers = get_users_lockers_dict_from_db()
     if user_name in users_lockers:
         locker = users_lockers[user_name]
         if locker is not None:
@@ -61,7 +82,7 @@ class Users(Resource):
         print("Users: get")
         try:
             print("Users: trying to get users")
-            users = get_users_lockers_dict()
+            users = get_users_lockers_dict_from_db()
             users_answer = {'users': users}
 
             print("Users: sending answer")
@@ -105,8 +126,8 @@ class UserLocker(Resource):
             print(user_name_locker)
 
             if user_name_locker["locker_id"] != "no_lockers":
-                self.add_locker_to_users_db(user_name_locker["user_name"],
-                                            user_name_locker["locker_id"])
+                update_locker_for_user_in_db(user_name_locker["user_name"],
+                                             user_name_locker["locker_id"])
                 return user_name_locker, 200
             else:
                 print("UserLocker: no free lockers")
@@ -114,14 +135,6 @@ class UserLocker(Resource):
         except:
             print(
                 "UserLocker: error while receiving message from LockerService")
-
-    def add_locker_to_users_db(self, user_name, locker_id):
-        """
-        Adding to DB locker_id for user
-        """
-        BD[user_name] = locker_id
-        print("UserLocker: adding locker_id {} for user {}".format(
-            locker_id, user_name))
 
 
 api.add_resource(Users, '/users')
