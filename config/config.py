@@ -17,8 +17,8 @@ def read_config():
     config.user_service_ip = data["user_service"]["ip"]
     config.user_service_port = data["user_service"]["port"]
 
-    config.rabbitqm_username = data["rabbitqm"]["username"]
-    config.rabbitqm_password = data["rabbitqm"]["password"]
+    config.rabbitmq_username = data["rabbitmq"]["username"]
+    config.rabbitmq_password = data["rabbitmq"]["password"]
 
     print(config)
     return config

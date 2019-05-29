@@ -15,6 +15,8 @@ api = Api(app)
 credentials = pika.PlainCredentials(config.rabbitmq_username,
                                     config.rabbitmq_password)
 
+BD = {"Ann": 1, "Olha": 2, "Natalie": None, "Alice": 3}
+
 
 def get_locker_from_locker_service(queue_name='get_locker_id', message=''):
     print("UserService: connecting to RabbitMQ")
@@ -37,7 +39,7 @@ def get_users_lockers_dict():
     dict = {"Ann": None, "Olha": 1, ...}
     TODO: Substitute dummy dictionary with DB data
     """
-    users_lockers = {"Ann": 1, "Olha": 2, "Natalie": None, "Alice": 3}
+    users_lockers = BD
     return users_lockers
 
 
@@ -48,7 +50,7 @@ def get_users_locker(user_name):
         if locker is not None:
             return locker
         else:
-            get_locker_from_locker_service(message="get_locker_id")
+            get_locker_from_locker_service(message=user_name)
             return "user without locker"
     else:
         return "user not exists"
@@ -95,18 +97,36 @@ class UserService(Resource):
 
 
 class UserLocker(Resource):
-    def get(self):
+    def post(self):
         print("UserLocker: receiving answer from LockerService")
         try:
             print("UserLocker: trying to receive answer from LockerService")
-            user_name_locker = request.form['user_name']
+            user_name_locker = request.form.to_dict()
+            print(user_name_locker)
+
+            if user_name_locker["locker_id"] != "no_lockers":
+                self.add_locker_to_users_db(user_name_locker["user_name"],
+                                            user_name_locker["locker_id"])
+                return user_name_locker, 200
+            else:
+                print("UserLocker: no free lockers")
+            return "Received locker_id for user!", 200
         except:
             print(
                 "UserLocker: error while receiving message from LockerService")
 
+    def add_locker_to_users_db(self, user_name, locker_id):
+        """
+        Adding to DB locker_id for user
+        """
+        BD[user_name] = locker_id
+        print("UserLocker: adding locker_id {} for user {}".format(
+            locker_id, user_name))
+
 
 api.add_resource(Users, '/users')
 api.add_resource(UserService, '/users_service')
+api.add_resource(UserLocker, '/user_locker')
 if __name__ == '__main__':
     app.run(
         host=config.user_service_ip, port=config.user_service_port, debug=True)
