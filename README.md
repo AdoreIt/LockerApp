@@ -103,13 +103,12 @@ xxx.xxx.xxx.xxx rabbit02
 where `xxx.xxx.xxx.xxx` is ip addresses where the nodes will be launched, `rabbit01` and `rabbit02` are node names.
 
 Create file `rabbitmq-env.conf` with the next line:
-```
-rabbit01$ vim conda/envs/env_name/etc/rabbitmq-env.conf
-NODENAME=rabbit@rabbit01
 
-rabbit02$ vim conda/envs/env_name/etc/rabbitmq-env.conf
-NODENAME=rabbit@rabbit02
-```
+`rabbit01$ vim ~/anaconda3/envs/p36_lockerapp/etc/rabbitmq-env.conf`
+>NODENAME=rabbit@rabbit01
+
+`rabbit02$ vim ~/anaconda3/envs/p36_lockerapp/etc/rabbitmq-env.conf`
+>NODENAME=rabbit@rabbit02
 
 `rabbit01$` is one computer, `rabbit02$` is another computer.
 
@@ -120,38 +119,35 @@ rabbit02$ rabbitmq-server
 ```
 
 This creates two independent RabbitMQ brokers, one on each node, as confirmed by the `cluster_status` command:
-```
-rabbit01$ rabbitmqctl cluster_status
-Cluster status of node rabbit@rabbit01 ...
+
+`rabbit01$ rabbitmqctl cluster_status`
+>Cluster status of node rabbit@rabbit01 ...
 [{nodes,[{disc,[rabbit@rabbit01]}]},{running_nodes,[rabbit@rabbit01]}]
 ...done.
 
-rabbit02$ rabbitmqctl cluster_status
-Cluster status of node rabbit@rabbit02 ...
+`rabbit02$ rabbitmqctl cluster_status`
+>Cluster status of node rabbit@rabbit02 ...
 [{nodes,[{disc,[rabbit@rabbit02]}]},{running_nodes,[rabbit@rabbit02]}]
 ...done.
-```
 
 Create the cluster
-```
-rabbit02$ rabbitmqctl stop_app
-Stopping node rabbit@rabbit02 ...done.
 
-rabbit02$ rabbitmqctl join_cluster rabbit@rabbit01
-Clustering node rabbit@rabbit02 with [rabbit@rabbit01] ...done.
+`rabbit02$ rabbitmqctl stop_app`
+>Stopping node rabbit@rabbit02 ...done.
 
-rabbit02$ rabbitmqctl start_app
-Starting node rabbit@rabbit02 ...done.
-```
+`rabbit02$ rabbitmqctl join_cluster rabbit@rabbit01`
+>Clustering node rabbit@rabbit02 with [rabbit@rabbit01] ...done.
+
+`rabbit02$ rabbitmqctl start_app`
+>Starting node rabbit@rabbit02 ...done.
 
 We can see that the two nodes are joined in a cluster by running the `cluster_status` command on either of the nodes:
-```
-rabbit01$ rabbitmqctl cluster_status
-Cluster status of node rabbit@rabbit1 ...
+
+`rabbit01$ rabbitmqctl cluster_status`
+>Cluster status of node rabbit@rabbit1 ...
 [{nodes,[{disc,[rabbit@rabbit01,rabbit@rabbit02]}]},
 {running_nodes,[rabbit@rabbit02,rabbit@rabbit01]}]
 ...done.
-```
 
 Enable `rabbitmq_management` in every node
 
@@ -162,7 +158,7 @@ Create admin user on one node, this admin user can be used for any node in clust
 rabbitmqctl add_user <user> <password>
 rabbitmqctl set_user_tags <user> administrator
 rabbitmqctl set_permissions -p / <user> ".*" ".*" ".*"
-``
+```
 (or set permissions through management website `xxx.xxx.xxx.xxx:15672`)
 
 ## Launching  <a name="launching"></a>
