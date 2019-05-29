@@ -153,9 +153,23 @@ Cluster status of node rabbit@rabbit1 ...
 ...done.
 ```
 
+Enable `rabbitmq_management` in every node
+
+`rabbitmq-plugins enable rabbitmq_management`
+
+Create admin user on one node, this admin user can be used for any node in cluster
+```
+rabbitmqctl add_user <user> <password>
+rabbitmqctl set_user_tags <user> administrator
+rabbitmqctl set_permissions -p / <user> ".*" ".*" ".*"
+``
+(or set permissions through management website `xxx.xxx.xxx.xxx:15672`)
+
 ## Launching  <a name="launching"></a>
 
-Update `config/config.json` with ip and host information of services.
+Update `config/config.json` with
+- ip and host information of services
+- credentials for RabbitMQ user
 
 Launch LockerApp:
 
