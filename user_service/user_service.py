@@ -94,6 +94,17 @@ class UserService(Resource):
             return 'Cannot connect to locker service', 404
 
 
+class UserLocker(Resource):
+    def get(self):
+        print("UserLocker: receiving answer from LockerService")
+        try:
+            print("UserLocker: trying to receive answer from LockerService")
+            user_name_locker = request.form['user_name']
+        except:
+            print(
+                "UserLocker: error while receiving message from LockerService")
+
+
 api.add_resource(Users, '/users')
 api.add_resource(UserService, '/users_service')
 if __name__ == '__main__':
