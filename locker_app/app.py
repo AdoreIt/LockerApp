@@ -52,7 +52,8 @@ def check():
                 if locker_answer == "user without locker":
                     no_new_locker = "All lockers are busy"
                 else:
-                    new_locker_message = "User {} occupies locker {}".format(name, locker_answer)
+                    new_locker_message = "User {} occupies locker {}".format(
+                        name, locker_answer)
             elif resp.status_code == 404:
                 error = resp.text
         else:

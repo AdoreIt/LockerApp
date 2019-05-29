@@ -1,5 +1,4 @@
-import sys
-import os
+import sys, os
 import json
 
 import pika
@@ -29,14 +28,13 @@ def callback(ch, method, properties, body):
         try:
             print("LockerService: trying to send empty locker id")
             data = {"user_name": body, "locker_id": str(empty_locker_id)}
-            resp = post('http://{}:{}/user_locker'
-                        .format(config.user_service_ip,
-                                config.user_service_port),
-                        data=data)
+            resp = post(
+                'http://{}:{}/user_locker'.format(config.user_service_ip,
+                                                  config.user_service_port),
+                data=data)
             update_lockers_db(empty_locker_id, False)
             if resp.status_code == 200:
-                print('LockerService: posted to UserService locker id: ',
-                      data)
+                print('LockerService: posted to UserService locker id: ', data)
                 return
             else:
                 print('LockerService: Cannot make POST locker_id')
@@ -46,10 +44,10 @@ def callback(ch, method, properties, body):
     data = {"user_name": body, "locker_id": "no_lockers"}
     print(data)
     try:
-        resp = post('http://{}:{}/user_locker'
-                    .format(config.user_service_ip,
-                            config.user_service_port),
-                    data=data)
+        resp = post(
+            'http://{}:{}/user_locker'.format(config.user_service_ip,
+                                              config.user_service_port),
+            data=data)
         if resp.status_code == 200:
             print('LockerService: posted to UserService locker id: ', data)
         else:

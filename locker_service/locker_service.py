@@ -1,5 +1,4 @@
-import sys
-import os
+import sys, os
 
 import requests
 from flask import Flask, request
