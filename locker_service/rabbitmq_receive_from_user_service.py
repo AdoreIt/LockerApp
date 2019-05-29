@@ -1,4 +1,3 @@
-from config import read_config
 import sys
 import os
 import json
@@ -8,6 +7,7 @@ from requests import post
 from locker_service import get_lockers_from_db, update_lockers_db
 
 sys.path.append(os.path.abspath(os.path.join('config')))
+from config import read_config
 
 config = read_config()
 
@@ -23,34 +23,41 @@ channel.queue_declare(queue='get_locker_id', durable=True)
 def callback(ch, method, properties, body):
     body = str(body.decode("utf-8"))
     print("LockerService - RabbitMQ received: ", body)
-    if body == "get_locker_id":
-        print("LockerService is searching for empty locker")
-        lockers_dict = get_lockers_from_db()
-        for locker_id, is_empty in lockers_dict.items():
-            if is_empty:
-                try:
-                    resp = post('http://{}:{}/pay/customer',
-                                data={'user_name_locker': {"name": body, "locker_id": locker_id}})
-                    if resp.status_code == 200:
-                        print('LockerService made post to UserService: ',
-                              json.loads(resp.text))
-                        break
-                    else:
-                        print('LockerService: Cannot make POST')
-                    update_lockers_db(locker_id, False)
-                except:
-                    print("LockerService: Failed to send locker id")
-            else:
-                try:
-                    resp = post('http://{}:{}/pay/customer',
-                                data={'user_name_locker': {"name": body, "locker_id": "no_empty"}})
-                    if resp.status_code == 200:
-                        print('LockerService made post to UserService: ',
-                              json.loads(resp.text))
-                        break
-                    else:
-                        print(
-                            'LockerService: Failed to send message that all lockers are busy')
+    print("LockerService is searching for empty locker")
+    lockers_dict = get_lockers_from_db()
+    for locker_id, is_empty in lockers_dict.items():
+        if is_empty:
+            try:
+                print("LockerService: trying to send empty locker id")
+                data = {"user_name": body, "locker_id": str(locker_id)}
+                print(data)
+                resp = post('http://{}:{}/user_locker'
+                            .format(config.user_service_ip,
+                                    config.user_service_port),
+                            data=data)
+                update_lockers_db(locker_id, False)
+                if resp.status_code == 200:
+                    print('LockerService: posted to UserService locker id: ',
+                          data)
+                    return
+                else:
+                    print('LockerService: Cannot make POST locker_id')
+            except:
+                print("LockerService: Failed to send locker id")
+                return
+    data = {"user_name": body, "locker_id": "no_lockers"}
+    print(data)
+    try:
+        resp = post('http://{}:{}/user_locker'
+                    .format(config.user_service_ip,
+                            config.user_service_port),
+                    data=data)
+        if resp.status_code == 200:
+            print('LockerService: posted to UserService locker id: ', data)
+        else:
+            print('LockerService: Cannot make POST np lockers')
+    except:
+        print("LockerService: Failed to send no lockers")
 
 
 channel.basic_consume(
