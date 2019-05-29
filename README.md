@@ -154,6 +154,9 @@ Cluster status of node rabbit@rabbit1 ...
 ```
 
 ## Launching  <a name="launching"></a>
+
+Update `config/config.json` with ip and host information of services.
+
 Launch LockerApp:
 
 `python locker_app/app.py`
