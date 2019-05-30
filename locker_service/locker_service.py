@@ -24,7 +24,6 @@ def get_lockers_from_db():
     """
     Getting lockers from DB and returning in dict format:
     dict = {1: True, 2: False, ...}
-    TODO: Substitute dummy dictionary with DB data
     """
     lockers_collection = lockers_db["lockers"]
     return lockers_collection
@@ -33,7 +32,7 @@ def get_lockers_from_db():
 def update_lockers_db(locker_id, is_empty):
     """
     Update instance in lockers DB
-    TODO: Substitute dummy dictionary with DB data
+    TODO: Check work
     """
     lockers_collection = get_lockers_from_db()
     locker = lockers_collection.find_one({"_id": locker_id})
@@ -46,7 +45,7 @@ def get_empty_locker_from_db():
     Select locker_id from DB where is_empty = True
     Choose one of them
     If there are no empty lockers, return None
-    TODO: Substitute dummy dictionary with DB data
+    TODO: Check work
     """
     lockers_collection = get_lockers_from_db()
     empty_locker = lockers_collection.find_one({"free": True})
@@ -66,6 +65,7 @@ class LockerService(Resource):
                 answer.update({doc["_id"]: doc["free"]})
 
             print("LockerService: ", answer)
+            answer = {i: answer[i] for i in sorted(answer.keys())}
             result = {'lockers': answer}
             return result, 200
         except:
