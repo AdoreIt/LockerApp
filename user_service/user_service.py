@@ -1,4 +1,5 @@
-import sys, os
+import os
+import sys
 
 import pika
 import requests
@@ -17,24 +18,16 @@ api = Api(app)
 credentials = pika.PlainCredentials(config.rabbitmq_username,
                                     config.rabbitmq_password)
 
-USER = 'cvmasters'
-PASSWORD = '1234'
-HOST = 'localhost'
-CONNECTION_PREFIX = "host='{host}' user='{user}' password='{password}'".format(
-                     host=HOST, user=USER, password=PASSWORD)
-
-BD = {"Ann": 1, "Olha": 2, "Natalie": None, "Alice": 3}
-
-connection_string = "{connection} dbname='{db}'".format(
-                          connection=CONNECTION_PREFIX, db='users_db')
-
 postgre_connection = None
+
 try:
-    postgre_connection =  psycopg2.connect(connection_string)
-except:
-    print("Can not connect to users database")
+    postgre_connection = psycopg2.connect(database="users_db", user="postgres")
+except (psycopg2.InternalError, psycopg2.IntegrityError) as e:
+    print("WARNING: Can not connect to users database")
+    print("WARNING INFO: {}".format(e))
 
 if postgre_connection is not None:
+    print("Postgresql: set cursor")
     cursor = postgre_connection.cursor()
 
 
@@ -57,22 +50,32 @@ def add_user_to_db(user_name):
     """
     Adding user with name user_name to db
     """
-    cursor.execute("insert into users (user_name, locker_id) values ({}, {});".format(user_name, "NULL"))
+    print("DB add_user_to_db")
+    print(user_name)
+    cursor.execute(
+        "insert into users (user_name, locker_id) values ('{}', {}); commit;".
+        format(user_name, "NULL"))
+
+    print("DB added user to db")
 
 
 def delete_user_from_db(user_name):
     """
     Delete user with name user_name from db
     """
-    cursor.execute("DELETE from users WHERE user_name = {};".format(user_name))
+    cursor.execute(
+        "DELETE from users WHERE user_name = {}; commit;".format(user_name))
 
 
 def update_locker_for_user_in_db(user_name, locker_id):
     """
     Update user with new locker_id (locker_id can be id or None)
     """
-    # BD[user_name] = locker_id
-    cursor.execute("UPDATE users SET locker_id = {} WHERE user_name = {};".format(locker_id, user_name))
+    print("DB update_locker_for_user_in_db for user {}, with locker {}".format(
+        user_name, locker_id))
+    cursor.execute(
+        "UPDATE users SET locker_id = {} WHERE user_name = '{}'; commit;".
+        format(int(locker_id), user_name))
     print("UserLocker: adding locker_id {} for user {}".format(
         locker_id, user_name))
 
@@ -81,8 +84,8 @@ def get_users_lockers_dict_from_db():
     """
     Getting users and their lockers from DB and returning in dict format:
     dict = {"Ann": None, "Olha": 1, ...}
-    TODO: Substitute dummy dictionary with DB data
     """
+    print("DB users_db: getting users from db")
     cursor.execute("SELECT * FROM users;")
     data = cursor.fetchall()
     users_lockers = {}
@@ -92,7 +95,14 @@ def get_users_lockers_dict_from_db():
 
 
 def get_users_locker(user_name):
+    """
+    Getting user's locker.
+    Getting locker by user's name.
+    If there is such user, and locker is not None - get his locker
+    else try to get locker from LockerService bu user_name
+    """
     users_lockers = get_users_lockers_dict_from_db()
+    print("get_users_locker: ", users_lockers)
     if user_name in users_lockers:
         locker = users_lockers[user_name]
         if locker is not None:
@@ -110,6 +120,7 @@ class Users(Resource):
         try:
             print("Users: trying to get users")
             users = get_users_lockers_dict_from_db()
+            print(users)
             users_answer = {'users': users}
 
             print("Users: sending answer")
@@ -125,14 +136,15 @@ class UserService(Resource):
         try:
             print("UserService: trying to get user's locker")
             user_name_req = request.form['user_name']
-            # TODO: Substitute dummy dictionary with DB data
-            # TODO: Change request structure to:
-            # request_structure = {
-            #     'request_message': "message from with req to do smth",
-            #     'data': 'data'
-            # }
+            print("UserService: received request", user_name_req)
 
             users_locker = get_users_locker(user_name_req)  # answer
+            print("UserService: ", users_locker)
+
+            if users_locker == "user not exists":
+                add_user_to_db(user_name_req)
+                users_locker = get_users_locker(user_name_req)
+                print(users_locker)
 
             print("UserService: ", users_locker)
             result = {'users_locker': users_locker}
@@ -153,9 +165,15 @@ class UserLocker(Resource):
             print(user_name_locker)
 
             if user_name_locker["locker_id"] != "no_lockers":
-                update_locker_for_user_in_db(user_name_locker["user_name"],
-                                             user_name_locker["locker_id"])
-                return user_name_locker, 200
+                if user_name_locker["locker_id"] != "locker_db_error":
+                    update_locker_for_user_in_db(user_name_locker["user_name"],
+                                                 user_name_locker["locker_id"])
+                    return user_name_locker, 200
+                else:
+                    answer = user_name_locker["locker_id"]
+                    print("UserLocker: sending {}".format(
+                        answer))  #locker_db_error
+                    return answer, 201
             else:
                 print("UserLocker: no free lockers")
             return "Received locker_id for user!", 200
