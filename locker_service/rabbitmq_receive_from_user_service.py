@@ -1,4 +1,5 @@
-import sys, os
+import os
+import sys
 import json
 
 import pika
@@ -24,15 +25,17 @@ def callback(ch, method, properties, body):
     print("LockerService - RabbitMQ received: ", body)
     print("LockerService is searching for empty locker")
     locker_id = get_empty_locker_from_db()
-    if locker_id:
+    print(locker_id)
+    if locker_id is not None:
         try:
             print("LockerService: trying to send empty locker id")
-            data = {"user_name": body, "locker_id": str(empty_locker_id)}
+            data = {"user_name": body, "locker_id": str(locker_id)}
+            update_lockers_db(locker_id, False)
+            print("LockerService: Found empty locker")
             resp = post(
                 'http://{}:{}/user_locker'.format(config.user_service_ip,
                                                   config.user_service_port),
                 data=data)
-            update_lockers_db(empty_locker_id, False)
             if resp.status_code == 200:
                 print('LockerService: posted to UserService locker id: ', data)
                 return
@@ -41,19 +44,21 @@ def callback(ch, method, properties, body):
         except:
             print("LockerService: Failed to send locker id")
             return
-    data = {"user_name": body, "locker_id": "no_lockers"}
-    print(data)
-    try:
-        resp = post(
-            'http://{}:{}/user_locker'.format(config.user_service_ip,
-                                              config.user_service_port),
-            data=data)
-        if resp.status_code == 200:
-            print('LockerService: posted to UserService locker id: ', data)
-        else:
-            print('LockerService: Cannot make POST np lockers')
-    except:
-        print("LockerService: Failed to send no lockers")
+    else:
+        data = {"user_name": body, "locker_id": "no_lockers"}
+        print(data)
+        try:
+            resp = post(
+                'http://{}:{}/user_locker'.format(config.user_service_ip,
+                                                  config.user_service_port),
+                data=data)
+            if resp.status_code == 200:
+                print('LockerService: posted to UserService locker id: ', data)
+                return
+            else:
+                print('LockerService: Cannot make POST no lockers')
+        except:
+            print("LockerService: Failed to send no lockers")
 
 
 channel.basic_consume(

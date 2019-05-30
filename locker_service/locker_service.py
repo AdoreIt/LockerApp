@@ -1,4 +1,5 @@
-import sys, os
+import os
+import sys
 
 import requests
 from flask import Flask, request
@@ -8,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.join('config')))
 from config import read_config
 
 from pymongo import MongoClient
+from pymongo.read_preferences import ReadPreference
 
 config = read_config()
 app = Flask(__name__)
@@ -16,7 +18,8 @@ api = Api(app)
 
 client = MongoClient('localhost',
                      replicaSet='lockers_rs',
-                     readPreference='secondaryPreferred')
+                     read_preference=ReadPreference.SECONDARY,
+                     serverSelectionTimeoutMS=10000)
 lockers_db = client["lockers_db"]
 
 
@@ -36,8 +39,12 @@ def update_lockers_db(locker_id, is_empty):
     """
     lockers_collection = get_lockers_from_db()
     locker = lockers_collection.find_one({"_id": locker_id})
-    locker["free"] = is_empty
-    lockers_collection.save(locker)
+    try:
+        locker["free"] = is_empty
+        lockers_collection.save(locker)
+    except:
+        return False
+    return True
 
 
 def get_empty_locker_from_db():
@@ -49,14 +56,14 @@ def get_empty_locker_from_db():
     """
     lockers_collection = get_lockers_from_db()
     empty_locker = lockers_collection.find_one({"free": True})
-    if empty_locker is not None:
+    if empty_locker:
         return empty_locker["_id"]
     return None
 
 
 class LockerService(Resource):
     def get(self):
-        print("LockerService: get to get lockers")
+        print("LockerService: get request to get lockers")
         try:
             print("LockerService: trying")
             answer = {}
