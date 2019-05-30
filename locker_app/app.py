@@ -39,11 +39,12 @@ def check():
 
         if locker_answer == "user not exists":
             no_user_message = "User {} doesn't exist".format(name)
-        elif locker_answer == "user without locker":
+        if locker_answer == "user without locker":
             no_locker_message = "User {} has no locker".format(name)
             resp = requests.get(
-                'http://{0}:{1}/users_service'.format(config.user_service_ip,
-                                                      config.user_service_port),
+                'http://{0}:{1}/users_service'
+                .format(config.user_service_ip,
+                        config.user_service_port),
                 data={"user_name": name})
             if resp.status_code == 200:
                 resp = json.loads(resp.text)
@@ -51,6 +52,8 @@ def check():
                 print("LOCKER ANSWER", locker_answer)
                 if locker_answer == "user without locker":
                     no_new_locker = "All lockers are busy"
+                elif locker_answer == "locker_db_error":
+                    no_new_locker = "Locker DB error: read only"
                 else:
                     new_locker_message = "User {} occupies locker {}".format(
                         name, locker_answer)

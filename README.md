@@ -1,105 +1,158 @@
-# cv_masters_lockers
-Distributed system project
+# LokerApp
 
 ![](https://github.com/AdoreIt/LockerApp/blob/master/doc/LockerApp.gif?raw=true)
 
-1. [Basic architecture](#architecture)
-2. [Installs](#installs)
-   1. [Conda enviroment](#conda_environment)
-   2. [Databases](#databases)
-      1. [PostgreSQL](#postgresql)
-      2. [MongoDB](#mongodb)
-   3. [RabbitMQ](#rabbitmq)
-3. [Launching](#launching)
+- [LokerApp](#lokerapp)
+  - [Basic architecture](#basic-architecture)
+  - [Installs](#installs)
+    - [Conda environment](#conda-environment)
+    - [Databases installation, configuration and creation](#databases-installation-configuration-and-creation)
+      - [PostgreSQL](#postgresql)
+        - [Install PostgreSQL on Ubuntu](#install-postgresql-on-ubuntu)
+        - [Start PostgreSQL server](#start-postgresql-server)
+        - [Create Database](#create-database)
+        - [Drop Database](#drop-database)
+      - [MongoDB](#mongodb)
+        - [Install python lib:](#install-python-lib)
+        - [Create database folders](#create-database-folders)
+        - [Create Database:](#create-database)
+        - [Drop Database:](#drop-database)
+    - [RabbitQM Setup](#rabbitqm-setup)
+  - [Launching](#launching)
 
+## Basic architecture
 
-## Basic architecture <a name="architecture"></a>
 ![](https://github.com/AdoreIt/LockerApp/blob/master/doc/architecture_diagram.png?raw=true)
 
-## Installs  <a name="installs"></a>
-### Conda environment  <a name="conda_environment"></a>
+## Installs
+### Conda environment
 
 Create an environment and activate it
-```
+
+``` bash
 conda create --name p36_lockerapp python=3.6
 conda activate p36_lockerapp
 ```
 
 Flask and RestAPI
-```
+
+``` bash
 pip install flask
 pip install flask-restful
 ```
 
 RabbitMQ
-```
+
+``` bash
 conda install -c conda-forge rabbitmq-server
 conda install -c conda-forge pika
 ```
 
-### Databases installation, configuration and creation <a name="databases"></a>
+Postgresql
 
-#### PostgreSQL <a name="postgresql"></a>
-
-Install PostgreSQL on Ubuntu:
+``` bash
+conda install -c anaconda psycopg2
 ```
+
+### Databases installation, configuration and creation
+
+#### PostgreSQL
+
+##### Install PostgreSQL on Ubuntu
+
+``` bash
 sudo apt update
-sudo apt-get install postgresql libpq-dev postgresql-client postgresql-client-common
+sudo apt-get install postgresql postgresql-contrib
+# optionally:
+sudo apt-get install libpq-dev postgresql-client postgresql-client-common
 ```
 
+<details>
+  <summary>If you not using conda</summary>
+  
 Install python lib (can be succesfully executed only if PostgreSQL is already installed):
 
-`pip install psycopg2`
-
-Start PostgreSQL server (Required before running the app):
-
-`sudo service postgresql start`
-
-Create Database:
-
-`cd user_service/psql_db && ./create_psql_db.sh`
-
-Drop Database:
-
-`cd user_service/psql_db && ./drop_psql_db.sh`
-
-
-#### MongoDB <a name="mongodb"></a>
-
-Install MongoDB on Ubuntu:
+``` bash
+pip install psycopg2
 ```
+
+</details>
+
+
+##### Start PostgreSQL server
+
+(Required before running the app):
+
+``` bash
+sudo service postgresql start
+```
+
+##### Create Database
+
+``` bash
+psql -f create_users_db.sql -U postgres \
+&& psql -f create_users_table.sql -U postgres -d users_db
+```
+
+##### Drop Database
+
+``` bash
+psql -f drop_users_db.sql -U postgres
+```
+
+---
+
+#### MongoDB
+
+<details>
+  <summary> Install MongoDB on Ubuntu if you don't use Conda </summary>
+
+``` bash
 sudo apt update
 sudo apt install -y mongodb
 ```
 
-Install python lib:
+##### Install python lib:
 
-`python -m pip install pymongo`
+```bash
+python -m pip install pymongo
+```
 
-Start MongoDB server:
+</details>
 
-`sudo service mongodb start`
+##### Create database folders
 
-Create Database:
+```bash
+cd mongo_db
+mkdir db0 db1 db2
+```
 
-`cd locker_service/mongo_db && bash create_mongo_db.sh`
+##### Create Database:
 
-Drop Database:
+```bash
+python locker_service/mongo_db/migrations/create_mongo_db.py
+```
 
-`cd locker_service/mongo_db && bash drop_mongo_db.sh`
+##### Drop Database:
 
+```bash
+python locker_service/mongo_db/migrations/drop_mongo_db.py`
+```
 
-### RabbitQM  Setup<a name="rabbitmq"></a>
-
+### RabbitQM  Setup
 To configure hostname, edit `hosts`
 
-`sudo vim /etc/hosts`
+``` bash
+sudo vim /etc/hosts
+```
 
 Add to file:
-```
+
+``` text
 xxx.xxx.xxx.xxx rabbit01
 xxx.xxx.xxx.xxx rabbit02
 ```
+
 where `xxx.xxx.xxx.xxx` is ip addresses where the nodes will be launched, `rabbit01` and `rabbit02` are node names.
 
 Create file `rabbitmq-env.conf` with the next line:
@@ -113,7 +166,8 @@ Create file `rabbitmq-env.conf` with the next line:
 `rabbit01$` is one computer, `rabbit02$` is another computer.
 
 Start independent nodes: run `rabbitmq-server` on each computer:
-```
+
+``` bash
 rabbit01$ rabbitmq-server
 rabbit02$ rabbitmq-server
 ```
@@ -154,16 +208,19 @@ Enable `rabbitmq_management` in every node
 `rabbitmq-plugins enable rabbitmq_management`
 
 Create admin user on one node, this admin user can be used for any node in cluster
-```
+
+``` bash
 rabbitmqctl add_user <user> <password>
 rabbitmqctl set_user_tags <user> administrator
 rabbitmqctl set_permissions -p / <user> ".*" ".*" ".*"
 ```
+
 (or set permissions through management website `xxx.xxx.xxx.xxx:15672`)
 
-## Launching  <a name="launching"></a>
+## Launching
 
 Update `config/config.json` with
+
 - ip and host information of services
 - credentials for RabbitMQ user
 
@@ -180,7 +237,8 @@ Launch UserService:
 `python user_service/user_service.py`
 
 Launch RabbitMQ cluster (two nodes from different computers whose ip adresses are specified in `/etc/hosts`):
-```
+
+``` bash
 rabbit01$ rabbitmq-server
 
 rabbit02$ rabbitmq-server
@@ -188,4 +246,20 @@ rabbit02$ rabbitmq-server
 
 Launch RabbitMQ receiver for LockerService:
 
-`python locker_service/rabbitmq_receive_from_user_service.py`
+``` bash
+python locker_service/rabbitmq_receive_from_user_service.py
+```
+
+Launch MongoDB with replication: run three separate mongodb servers
+
+  ```bash
+  sudo mongod --port 27017 --dbpath ./db0 --replSet lockers_rs
+  sudo mongod --port 27018 --dbpath ./db1 --replSet lockers_rs
+  sudo mongod --port 27019 --dbpath ./db2 --replSet lockers_rs
+  ```
+
+Initialize replica set
+
+```bash
+python locker_service/mongo_db/migrations/create_mongo_db.py
+```

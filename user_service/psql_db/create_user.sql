@@ -1,0 +1,1 @@
+insert into users_db (user_name, locker_id) values ('Natalie', NULL);
