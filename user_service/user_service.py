@@ -8,6 +8,8 @@ from flask_restful import Resource, Api, reqparse
 sys.path.append(os.path.abspath(os.path.join('config')))
 from config import read_config
 
+import psycopg2
+
 config = read_config()
 app = Flask(__name__)
 api = Api(app)
@@ -15,7 +17,25 @@ api = Api(app)
 credentials = pika.PlainCredentials(config.rabbitmq_username,
                                     config.rabbitmq_password)
 
+USER = 'cvmasters'
+PASSWORD = '1234'
+HOST = 'localhost'
+CONNECTION_PREFIX = "host='{host}' user='{user}' password='{password}'".format(
+                     host=HOST, user=USER, password=PASSWORD)
+
 BD = {"Ann": 1, "Olha": 2, "Natalie": None, "Alice": 3}
+
+connection_string = "{connection} dbname='{db}'".format(
+                          connection=CONNECTION_PREFIX, db='users_db')
+
+postgre_connection = None
+try:
+    postgre_connection =  psycopg2.connect(connection_string)
+except:
+    print("Can not connect to users database")
+
+if postgre_connection is not None:
+    cursor = postgre_connection.cursor()
 
 
 def get_locker_from_locker_service(queue_name='get_locker_id', message=''):
@@ -37,19 +57,22 @@ def add_user_to_db(user_name):
     """
     Adding user with name user_name to db
     """
+    cursor.execute("insert into users (user_name, locker_id) values ({}, {});".format(user_name, "NULL"))
 
 
 def delete_user_from_db(user_name):
     """
     Delete user with name user_name from db
     """
+    cursor.execute("DELETE from users WHERE user_name = {};".format(user_name))
 
 
 def update_locker_for_user_in_db(user_name, locker_id):
     """
     Update user with new locker_id (locker_id can be id or None)
     """
-    BD[user_name] = locker_id
+    # BD[user_name] = locker_id
+    cursor.execute("UPDATE users SET locker_id = {} WHERE user_name = {};".format(locker_id, user_name))
     print("UserLocker: adding locker_id {} for user {}".format(
         locker_id, user_name))
 
@@ -60,7 +83,11 @@ def get_users_lockers_dict_from_db():
     dict = {"Ann": None, "Olha": 1, ...}
     TODO: Substitute dummy dictionary with DB data
     """
-    users_lockers = BD
+    cursor.execute("SELECT * FROM users;")
+    data = cursor.fetchall()
+    users_lockers = {}
+    for row in data:
+        users_lockers.update({row[1]: row[2]})
     return users_lockers
 
 
@@ -143,3 +170,4 @@ api.add_resource(UserLocker, '/user_locker')
 if __name__ == '__main__':
     app.run(
         host=config.user_service_ip, port=config.user_service_port, debug=True)
+   

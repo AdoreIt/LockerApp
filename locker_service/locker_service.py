@@ -60,7 +60,10 @@ class LockerService(Resource):
         print("LockerService: get to get lockers")
         try:
             print("LockerService: trying")
-            answer = get_lockers_from_db()
+            answer = {}
+            answer_cursor = get_lockers_from_db()
+            for doc in answer_cursor.find():
+                answer.update({doc["_id"]: doc["free"]})
 
             print("LockerService: ", answer)
             result = {'lockers': answer}
