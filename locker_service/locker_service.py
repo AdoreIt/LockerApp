@@ -7,9 +7,17 @@ from flask_restful import Resource, Api, reqparse
 sys.path.append(os.path.abspath(os.path.join('config')))
 from config import read_config
 
+from pymongo import MongoClient
+
 config = read_config()
 app = Flask(__name__)
 api = Api(app)
+
+
+client = MongoClient('localhost',
+                     replicaSet='lockers_rs',
+                     readPreference='secondaryPreferred')
+lockers_db = client["lockers_db"]
 
 
 def get_lockers_from_db():
@@ -18,8 +26,8 @@ def get_lockers_from_db():
     dict = {1: True, 2: False, ...}
     TODO: Substitute dummy dictionary with DB data
     """
-    lockers_dict = {1: False, 2: True, 3: False, 4: False, 5: False, 6: False}
-    return lockers_dict
+    lockers_collection = lockers_db["lockers"]
+    return lockers_collection
 
 
 def update_lockers_db(locker_id, is_empty):
@@ -27,8 +35,10 @@ def update_lockers_db(locker_id, is_empty):
     Update instance in lockers DB
     TODO: Substitute dummy dictionary with DB data
     """
-    lockers_dict = get_lockers_from_db()
-    lockers_dict[locker_id] = is_empty
+    lockers_collection = get_lockers_from_db()
+    locker = lockers_collection.find_one({"_id": locker_id})
+    locker["free"] = is_empty
+    lockers_collection.save(locker)
 
 
 def get_empty_locker_from_db():
@@ -38,10 +48,10 @@ def get_empty_locker_from_db():
     If there are no empty lockers, return None
     TODO: Substitute dummy dictionary with DB data
     """
-    lockers_dict = get_lockers_from_db()
-    for locker_id, is_empty in lockers_dict:
-        if is_empty:
-            return locker_id
+    lockers_collection = get_lockers_from_db()
+    empty_locker = lockers_collection.find_one({"free": True})
+    if empty_locker is not None:
+        return empty_locker["_id"]
     return None
 
 

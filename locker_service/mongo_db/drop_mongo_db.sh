@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-mongo < ./migrations_mongo/drop_lockers_db.js
+python drop_lockers_db.py
