@@ -170,4 +170,3 @@ api.add_resource(UserLocker, '/user_locker')
 if __name__ == '__main__':
     app.run(
         host=config.user_service_ip, port=config.user_service_port, debug=True)
-   

@@ -76,7 +76,7 @@ Install python lib:
 
 `python -m pip install pymongo`
 
-Start MongoDB server:
+Start MongoDB server(not needed to run our app):
 
 `sudo service mongodb start`
 
@@ -87,6 +87,29 @@ Create Database:
 Drop Database:
 
 `cd locker_service/mongo_db && bash drop_mongo_db.sh`
+
+To run with replication:
+
+  1) Create database folders
+
+  ```
+  cd mongo_db
+  mkdir db0 db1 db2
+  ```
+
+  2) Run three separate mongodb servers
+
+  ```
+  sudo mongod --port 27017 --dbpath ./db0 --replSet lockers_rs
+  sudo mongod --port 27018 --dbpath ./db1 --replSet lockers_rs
+  sudo mongod --port 27019 --dbpath ./db2 --replSet lockers_rs
+
+  ```
+  3) Initialize replica set
+
+  `bash create_mongo_db.sh`
+
+  4) Connect from locker service and use
 
 
 ### RabbitQM  Setup<a name="rabbitmq"></a>
