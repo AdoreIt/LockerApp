@@ -3,4 +3,4 @@ if __name__ == "__main__":
     client = MongoClient('localhost',
                         replicaSet='lockers_rs',
                         readPreference='secondaryPreferred')
-    client.drop_database('lockers')
+    client.drop_database('lockers_db')
