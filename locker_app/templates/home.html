@@ -1,14 +1,20 @@
 {% extends 'layout.html' %}
 
+{% block userlogo %}
+<i class="{{animal_class}}"></i>
+<p>{{animal_name}}</p>
+{% endblock %}
+
 {% block body %}
-<div class="container">
+<div class=" container">
     <form action="" method="post" role="form">
-    <div class="input-group mb-3">
-        <input type="text" class="form-control" id="name" name="name" placeholder="Type user name..." aria-describedby="basic-addon2">
-        <div class="input-group-append">
-            <input type="submit" action="/check" method="post" class="btn btn-success" name="check">
-        </div>    
-    </div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="name" name="name" placeholder="Type user name..."
+                aria-describedby="basic-addon2">
+            <div class="input-group-append">
+                <input type="submit" action="/check" method="post" class="btn btn-outline-info" name="check">
+            </div>
+        </div>
     </form>
     {% block check %}{% endblock %}
 </div>
