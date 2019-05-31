@@ -130,7 +130,7 @@ mkdir db0 db1 db2
 ##### Create Database:
 
 ```bash
-python locker_service/mongo_db/migrations/create_mongo_db.py
+python locker_service/mongo_db/migrations/create_lockers_db.py
 ```
 
 ##### Drop Database:
@@ -224,19 +224,19 @@ Update `config/config.json` with
 - ip and host information of services
 - credentials for RabbitMQ user
 
-Launch LockerApp:
+Launch **LockerApp**:
 
 `python locker_app/app.py`
 
-Launch LockerService:
+Launch **LockerService**:
 
 `python locker_service/locker_service.py`
 
-Launch UserService:
+Launch **UserService**:
 
 `python user_service/user_service.py`
 
-Launch RabbitMQ cluster (two nodes from different computers whose ip adresses are specified in `/etc/hosts`):
+Launch **RabbitMQ cluster** (two nodes from different computers whose ip adresses are specified in `/etc/hosts`):
 
 ``` bash
 rabbit01$ rabbitmq-server
@@ -244,22 +244,55 @@ rabbit01$ rabbitmq-server
 rabbit02$ rabbitmq-server
 ```
 
-Launch RabbitMQ receiver for LockerService:
+Launch **RabbitMQ receiver** for LockerService:
 
 ``` bash
 python locker_service/rabbitmq_receive_from_user_service.py
 ```
 
-Launch MongoDB with replication: run three separate mongodb servers
+Launch **MongoDB** with replication: run three separate mongodb servers
 
-  ```bash
-  sudo mongod --port 27017 --dbpath ./db0 --replSet lockers_rs
-  sudo mongod --port 27018 --dbpath ./db1 --replSet lockers_rs
-  sudo mongod --port 27019 --dbpath ./db2 --replSet lockers_rs
-  ```
+```bash
+mongod --port 27017 --dbpath ./db0 --replSet lockers_rs
+mongod --port 27018 --dbpath ./db1 --replSet lockers_rs
+mongod --port 27019 --dbpath ./db2 --replSet lockers_rs
+```
 
 Initialize replica set
 
-```bash
-python locker_service/mongo_db/migrations/create_mongo_db.py
+``` bash
+python locker_service/mongo_db/migrations/create_lockers_db.py
 ```
+
+If you have troubles with creating replica set, run
+
+``` bash
+mongod --port 27017 --dbpath ./db0 --replSet lockers_rs
+```
+
+In another terminal run `mongo` to open MongoDB terminal (when only one mongo node is active).
+Then run `rs.init()`, launch other nodes
+
+``` bash
+mongod --port 27018 --dbpath ./db1 --replSet lockers_rs
+mongod --port 27019 --dbpath ./db2 --replSet lockers_rs
+```
+
+and add these two members to the replica set by executing
+
+``` bash
+rs.add("localhost:27018");
+rs.add("localhost:27019");
+```
+
+Then run
+
+``` bash
+python locker_service/mongo_db/migrations/create_lockers_db.py
+```
+
+without command
+
+```` bash
+python locker_service/mongo_db/migrations/create_lockers_db.py
+````
