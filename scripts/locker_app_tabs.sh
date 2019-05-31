@@ -1,9 +1,11 @@
 #!/bin/sh
 
-#chmod +x locker_app_tab.sh
-locker_app_path="$HOME/Uni/2nd_semester/Distributed/LockerApp"
+#chmod +x locker_app_tabs.sh
+
+# change ... to your path
+locker_app_path="$HOME/.../LockerApp"
 # change env_name to your env name
-anaconda_env_activate="conda activate p36_cvm_project"
+anaconda_env_activate="conda activate env_name"
 
 # create locker tab
 guake --new-tab $locker_app_path -r "LockerAppUserServiceRecieve"
