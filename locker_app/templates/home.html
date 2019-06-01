@@ -12,11 +12,14 @@
             <input type="text" class="form-control" id="name" name="name" placeholder="Type user name..."
                 aria-describedby="basic-addon2">
             <div class="input-group-append">
-                <input type="submit" action="/check" method="post" class="btn btn-outline-info" name="check">
+                <input type="submit" action="/check" method="post" class="btn btn-outline-info" name="check"
+                    value="Check">
             </div>
         </div>
     </form>
     {% block check %}{% endblock %}
+    {% block user %}{% endblock %}
+    {% block locker %}{% endblock %}
 </div>
 
 {% endblock %}

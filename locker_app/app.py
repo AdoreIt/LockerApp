@@ -39,35 +39,42 @@ def check():
     error = None
 
     name = request.form.get("name", "")
+    data = {"message": "check_user", "user_name": name}
+    print("LockerApp: Sending request to UserService: ", data)
     try:
         resp = requests.get(
             'http://{0}:{1}/users_service'.format(config.user_service_ip,
                                                   config.user_service_port),
-            data={"user_name": name})
+            data=data)
 
         if resp.status_code == 200:
             resp = json.loads(resp.text)
-            locker_answer = resp["users_locker"]
-
-            if locker_answer == "user not exists":
+            locker_answer = resp["response"]["data"]["locker_id"]
+            message = "User {} occupies locker {}".format(name,
+                                                          locker_answer)
+        elif resp.status_code == 400:
+            resp = json.loads(resp.text)
+            locker_answer = resp["response"]
+            if locker_answer["message"] == "user_not_exists":
                 no_user_message = "User {} doesn't exist".format(name)
-            if locker_answer == "user without locker":
+                return render_template(
+                    "add_user.html",
+                    info=no_user_message,
+                    animal_class=animal_class, animal_name=animal_name)
+            if locker_answer["message"] == "user_without_locker":
                 no_locker_message = "User {} has no locker".format(name)
-            else:
-                message = "User {} occupies locker {}".format(name,
-                                                              locker_answer)
-        elif resp.status_code == 404:
-            error = resp.text
+                return render_template(
+                    "add_locker.html",
+                    info=no_locker_message,
+                    animal_class=animal_class, animal_name=animal_name)
 
-    except:
+    except Exception as e:
+        print("Exception", e)
         error = "Service temporary anavailable"
 
     return render_template(
         "check.html",
         success=message,
-        info=no_locker_message,
-        warning=no_user_message,
-        error=error,
         animal_class=animal_class, animal_name=animal_name)
 
 
