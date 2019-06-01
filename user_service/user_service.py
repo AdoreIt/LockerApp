@@ -51,6 +51,22 @@ def get_locker_from_locker_service(queue_name='get_locker_id', message=''):
     connection.close()
 
 
+def free_locker_id_rabbitqm(queue_name='free_locker_id', message=''):
+    logger.info("UserService: connecting to RabbitMQ")
+
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(credentials=credentials))
+    channel = connection.channel()
+
+    channel.queue_declare(queue=queue_name, durable=True)
+
+    channel.basic_publish(
+        exchange='', routing_key=queue_name, body=str(message))
+    logger.info("UserService - RabbitMQ sent:  {}".format(message))
+
+    connection.close()
+
+
 def add_user_to_db(user_name):
     """
     Adding user with name user_name to db
@@ -76,11 +92,18 @@ def update_locker_for_user_in_db(user_name, locker_id):
     logger.info(
         "DB update_locker_for_user_in_db for user {}, with locker {}".format(
             user_name, locker_id))
-    cursor.execute(
-        "UPDATE users SET locker_id = {} WHERE user_name = '{}'; commit;".
-        format(int(locker_id), user_name))
-    logger.info("UserLocker: adding locker_id {} for user {}".format(
-        locker_id, user_name))
+    if locker_id == "NULL":
+        cursor.execute(
+            "UPDATE users SET locker_id = {} WHERE user_name = '{}'; commit;".
+            format(locker_id, user_name))
+        logger.info("UserLocker: updated locker_id {} for user {}".format(
+            locker_id, user_name))
+    else:
+        cursor.execute(
+            "UPDATE users SET locker_id = {} WHERE user_name = '{}'; commit;".
+            format(int(locker_id), user_name))
+        logger.info("UserLocker: updated locker_id {} for user {}".format(
+            locker_id, user_name))
 
 
 def get_users_lockers_dict_from_db():
@@ -139,6 +162,21 @@ def resp_json(data, code):
     return resp
 
 
+def process_db_check_user_answer(check_user_db_answer, user_name):
+    if check_user_db_answer["status"] == "failed":
+        answer = form_response(check_user_db_answer["data"], None)
+        # user_without_locker or user_not_exists
+        logger.warning("UserService: sending answer {}".format(answer))
+        return (answer, 400)
+    else:
+        answer = form_response("user_with_locker", {
+            "user_name": user_name,
+            "locker_id": check_user_db_answer["data"]
+        })
+        logger.info("UserService: sending answer {}".format(answer))
+        return (answer, 200)
+
+
 class Users(Resource):
     def get(self):
         logger.info("Users: get")
@@ -174,20 +212,9 @@ class UserService(Resource):
                     "UserService: checking user {} in db".format(user_name))
                 check_user_db_answer = get_users_locker(user_name)
 
-                if check_user_db_answer["status"] == "failed":
-                    answer = form_response(check_user_db_answer["data"], None)
-                    # user_without_locker or user_not_exists
-                    logger.warning(
-                        "UserService: sending answer {}".format(answer))
-                    return resp_json(answer, 400)
-                else:
-                    answer = form_response(
-                        "user_with_locker", {
-                            "user_name": user_name,
-                            "locker_id": check_user_db_answer["data"]
-                        })
-                    logger.info("UserService: sending answer {}".format(answer))
-                    return resp_json(answer, 200)
+                answer, status_code = process_db_check_user_answer(
+                    check_user_db_answer, user_name)
+                return resp_json(answer, status_code)
 
             elif message_req["message"] == "get_locker_for_user":
                 user_name = message_req["user_name"]
@@ -204,6 +231,42 @@ class UserService(Resource):
 
                 logger.info("UserService: sending answer {}".format(answer))
                 return resp_json(answer, 200)
+
+            elif message_req["message"] == "free_users_locker":
+                user_name = message_req["user_name"]
+
+                logger.info(
+                    "UserService: checking user {} in db".format(user_name))
+                check_user_db_answer = get_users_locker(user_name)
+
+                db_answer_dict, status_code = process_db_check_user_answer(
+                    check_user_db_answer, user_name)
+
+                if status_code == 200:
+                    locker_id = db_answer_dict["response"]["data"]["locker_id"]
+
+                    logger.info(
+                        "UserService: making request to DB to free locker of user {}"
+                        .format(user_name))
+                    update_locker_for_user_in_db(user_name, "NULL")
+
+                    logger.info(
+                        "UserService: sending rabbit request to free {}'s locker with id {}"
+                        .format(user_name, locker_id))
+                    free_locker_id_rabbitqm(message=locker_id)
+
+                    logger.info(
+                        "UserService: sent rabbit request to free {}'s locker with id {}"
+                        .format(user_name, locker_id))
+                    answer = form_response("sent rabbit request", None)
+
+                    logger.info("UserService: sending answer {}".format(answer))
+                    return resp_json(answer, 200)
+
+                else:
+                    logger.info(
+                        "UserService: sending answer {}".format(db_answer_dict))
+                    return resp_json(db_answer_dict, status_code)
 
             elif message_req["message"] == "add_user":
                 user_name = message_req["user_name"]
