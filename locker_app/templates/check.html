@@ -12,6 +12,11 @@
 <div class="alert alert-info">
     <strong>Info!</strong> {{ info }}
     <div class="input-group-append">
+        {% if user exists %}
+        <form action="/delete_user" method="post">
+            <button type="submit" class="btn btn-outline-secondary">Delete user</button>
+        </form>
+        {% endif %}
         {% if no_user %}
         <form action="/adduser" method="post">
             <button type="submit" class="btn btn-outline-info">Add user</button>
