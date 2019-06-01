@@ -4,13 +4,35 @@
 
 {% if success %}
 <div class="alert alert-success">
-    <strong>Success!</strong> {{ success }}
+    <strong>Info!</strong> {{ success }}
 </div>
 {% endif %}
 
 {% if info %}
 <div class="alert alert-info">
     <strong>Info!</strong> {{ info }}
+    <div class="input-group-append">
+        {% if user_exists %}
+        <form action="/delete_user" method="post">
+            <button type="submit" class="btn btn-outline-secondary">Delete user</button>
+        </form>
+        {% endif %}
+        {% if no_user %}
+        <form action="/adduser" method="post">
+            <button type="submit" class="btn btn-outline-info">Add user</button>
+        </form>
+        {% endif %}
+        {% if locker_exists %}
+        <form action="/delete_locker" method="post">
+            <button type="submit" class="btn btn-outline-secondary">Delete locker</button>
+        </form>
+        {% endif %}
+        {% if no_locker %}
+        <form action="/addlocker" method="post">
+            <button type="submit" class="btn btn-outline-info">Add locker</button>
+        </form>
+        {% endif %}
+    </div>
 </div>
 {% endif %}
 
@@ -23,18 +45,6 @@
 {% if error %}
 <div class="alert alert-danger">
     <strong>Error!</strong> {{ error }}
-</div>
-{% endif %}
-
-{% if new_locker_message %}
-<div class="alert alert-success">
-    <strong>Updated</strong> {{ new_locker_message }}
-</div>
-{% endif %}
-
-{% if no_new_locker %}
-<div class="alert alert-warning">
-    <strong>Updated</strong> {{ no_new_locker }}
 </div>
 {% endif %}
 

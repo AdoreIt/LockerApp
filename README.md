@@ -48,6 +48,7 @@ RabbitMQ
 ``` bash
 conda install -c conda-forge rabbitmq-server
 conda install -c conda-forge pika
+conda install -c conda-forge colorlog
 ```
 
 Postgresql
