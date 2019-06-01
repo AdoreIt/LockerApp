@@ -60,8 +60,7 @@ def free_locker_id_rabbitqm(queue_name='free_locker_id', message=''):
 
     channel.queue_declare(queue=queue_name, durable=True)
 
-    channel.basic_publish(
-        exchange='', routing_key=queue_name, body=str(message))
+    channel.basic_publish(exchange='', routing_key=queue_name, body=message)
     logger.info("UserService - RabbitMQ sent:  {}".format(message))
 
     connection.close()
@@ -248,7 +247,11 @@ class UserService(Resource):
                     logger.info(
                         "UserService: sending rabbit request to free {}'s locker with id {}"
                         .format(user_name, locker_id))
-                    free_locker_id_rabbitqm(message=locker_id)
+                    free_locker_id_rabbitqm(
+                        message=json.dumps({
+                            "user_name": user_name,
+                            "locker_id": locker_id
+                        }))
 
                     logger.info(
                         "UserService: sent rabbit request to free {}'s locker with id {}"
