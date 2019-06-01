@@ -54,8 +54,13 @@ def check():
             resp = json.loads(resp.text)
             locker_answer = resp["response"]["data"]["locker_id"]
             logger.info("LockerApp received response that user {} has locker {}".format(name, locker_answer))
-            message = "User {} occupies locker {}".format(name,
-                                                          locker_answer)
+            message = "User {} occupies locker {}".format(
+                name, locker_answer)
+            return render_template(
+                "check.html",
+                success=message,
+                locker_exists=True,
+                animal_class=animal_class, animal_name=animal_name)
         elif resp.status_code == 400:
             resp = json.loads(resp.text)
             locker_answer = resp["response"]
@@ -78,6 +83,7 @@ def check():
                     "check.html",
                     info=no_locker_message,
                     no_locker=True,
+                    user_exists=True,
                     animal_class=animal_class, animal_name=animal_name))
                 resp.set_cookie("user_name", name)
                 return resp
@@ -85,12 +91,10 @@ def check():
     except Exception as e:
         logger.critical("Exception {}".format(e))
         error = str(e)
-
-    return render_template(
-        "check.html",
-        success=message,
-        error=error,
-        animal_class=animal_class, animal_name=animal_name)
+        return render_template(
+            "check.html",
+            error=error,
+            animal_class=animal_class, animal_name=animal_name)
 
 
 @app.route("/adduser", methods=['POST'])
@@ -115,6 +119,44 @@ def add_user():
             resp = json.loads(resp.text)
             logger.warning("LockerApp received: {}".format(resp))
             error = "User {} already exists. Return to Home screen to continue".format(name)
+            return render_template(
+                "check.html",
+                error=error,
+                animal_class=animal_class, animal_name=animal_name)
+
+    except Exception as e:
+        logger.critical("Exception {}".format(e))
+        message = "LockerApp: Adding user service temporary anavailable"
+
+    return render_template(
+        "check.html",
+        success=message,
+        error=error,
+        animal_class=animal_class, animal_name=animal_name)
+
+
+@app.route("/delete_user", methods=['POST'])
+def delete_user():
+    logger.info("LockerApp: In delete user function")
+    message = None
+    error = None
+    name = request.cookies.get("user_name")
+    data = {"message": "delete_user", "user_name": name}
+    logger.info("LockerApp: Sending request to UserService: {}".format(data))
+    try:
+        resp = requests.get(
+            'http://{0}:{1}/users_service'.format(config.user_service_ip,
+                                                  config.user_service_port),
+            data=data)
+
+        if resp.status_code == 200:
+            resp = json.loads(resp.text)
+            logger.info("LockerApp received: {}".format(resp))
+            message = "User {} deleted. Return to Home screen to continue".format(name)
+        elif resp.status_code == 404:
+            resp = json.loads(resp.text)
+            logger.warning("LockerApp received: {}".format(resp))
+            error = "User {} doesn't exist. Return to Home screen to continue".format(name)
             return render_template(
                 "check.html",
                 error=error,
@@ -160,6 +202,11 @@ def add_locker():
                     logger.info("LockerApp received response that user {} occupies locker {}", name, locker_answer)
                     message = "User {} occupies locker {}. Return to Home screen to continue".format(
                             name, locker_answer)
+                    return render_template(
+                        "check.html",
+                        success=message,
+                        locker_exists=True,
+                        animal_class=animal_class, animal_name=animal_name)
                 elif resp.status_code == 400:
                     resp = json.loads(resp.text)
                     locker_answer = resp["response"]
@@ -171,6 +218,7 @@ def add_locker():
                             "check.html",
                             info=no_locker_message,
                             no_locker=True,
+                            user_exists=True,
                             animal_class=animal_class,
                             animal_name=animal_name))
                         resp.set_cookie("user_name", name)
@@ -182,7 +230,6 @@ def add_locker():
 
             return render_template(
                 "check.html",
-                success=message,
                 error=error,
                 animal_class=animal_class, animal_name=animal_name)
 

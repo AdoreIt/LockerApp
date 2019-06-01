@@ -22,6 +22,11 @@
             <button type="submit" class="btn btn-outline-info">Add user</button>
         </form>
         {% endif %}
+        {% if locker_exists %}
+        <form action="/delete_user" method="post">
+            <button type="submit" class="btn btn-outline-secondary">Delete locker</button>
+        </form>
+        {% endif %}
         {% if no_locker %}
         <form action="/addlocker" method="post">
             <button type="submit" class="btn btn-outline-info">Add locker</button>
