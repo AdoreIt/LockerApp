@@ -84,6 +84,7 @@ def callback_get(ch, method, properties, body):
 
 def callback_free(ch, method, properties, body):
     body = str(body.decode("utf-8"))
+    data = {"user_name": body, "locker_id": "NULL"}
     logger.info(
         "LockerService RabbitMQ receiver: RabbitMQ received: {}".format(body))
     logger.info("LockerService RabbitMQ receiver: frees up locker")
@@ -95,7 +96,7 @@ def callback_free(ch, method, properties, body):
             resp = post(
                 'http://{}:{}/user_locker'.format(config.user_service_ip,
                                                   config.user_service_port),
-                data=body)
+                data=data)
             if resp.status_code == 200:
                 logger.info(
                     'LockerService RabbitMQ receiver: posted to UserService: {}'.format(body))
@@ -107,6 +108,23 @@ def callback_free(ch, method, properties, body):
                 "LockerService RabbitMQ receiver: Failed to send no lockers {}".format(e))
     else:
         logger.warning("Cannot empty locker: DB errors")
+        data = {"user_name": body, "locker_id": "locker_db_error"}
+        try:
+            logger.info(
+                "LockerService RabbitMQ receiver: trying to post: None")
+            resp = post(
+                'http://{}:{}/user_locker'.format(config.user_service_ip,
+                                                  config.user_service_port),
+                data=data)
+            if resp.status_code == 200:
+                logger.info(
+                    'LockerService RabbitMQ receiver: posted to UserService: None')
+                return
+            else:
+                logger.error('LockerService RabbitMQ receiver: Cannot make POST about unable to free up locker')
+        except Exception as e:
+            logger.critical(
+                "LockerService RabbitMQ receiver: Failed to send no lockers {}".format(e))
 
 
 channel.basic_consume(

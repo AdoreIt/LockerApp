@@ -283,8 +283,8 @@ def delete_locker():
                     resp = json.loads(resp.text)
                     locker_answer = resp["response"]["data"]["locker_id"]
                     logger.info("LockerApp received response that user {} occupies locker {}", name, locker_answer)
-                    message = "User {} occupies locker {}. Return to Home screen to continue".format(
-                            name, locker_answer)
+                    message = "Cannot free up locker {} for user {}. Return to Home screen to continue".format(
+                            locker_answer, name)
                     resp = make_response(render_template(
                         "check.html",
                         info=message,
@@ -310,6 +310,8 @@ def delete_locker():
                             animal_name=animal_name))
                         resp.set_cookie("user_name", name)
                         return resp
+                elif resp.status_code == 404:
+                    logger.error("Got 404 after trying to delete locker")
 
             except Exception as e:
                 logger.critical("Exception {}".format(e))
