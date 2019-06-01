@@ -7,9 +7,12 @@ from requests import post
 from locker_service import update_lockers_db, get_empty_locker_from_db
 
 sys.path.append(os.path.abspath(os.path.join('config')))
+sys.path.append(os.path.abspath(os.path.join('utils')))
 from config import read_config
+from logger import setup_logger
 
 config = read_config()
+logger = setup_logger()
 
 credentials = pika.PlainCredentials(config.rabbitmq_username,
                                     config.rabbitmq_password)
@@ -22,47 +25,67 @@ channel.queue_declare(queue='get_locker_id', durable=True)
 
 def callback(ch, method, properties, body):
     body = str(body.decode("utf-8"))
-    print("LockerService - RabbitMQ received: ", body)
-    print("LockerService is searching for empty locker")
+    logger.info(
+        "LockerService RabbitMQ receiver: RabbitMQ received: {}".format(body))
+    logger.info(
+        "LockerService RabbitMQ receiver: is searching for empty locker")
     locker_id = get_empty_locker_from_db()
-    print(locker_id)
+    logger.info(
+        "LockerService RabbitMQ receiver: got locker_id {}".format(locker_id))
     if locker_id is not None:
         try:
-            print("LockerService: trying to send empty locker id")
+            logger.info(
+                "LockerService RabbitMQ receiver: trying to send empty locker id"
+            )
             data = {"user_name": body, "locker_id": str(locker_id)}
             update_lockers_db(locker_id, False)
-            print("LockerService: Found empty locker")
+            logger.info("LockerService RabbitMQ receiver: Found empty locker")
             resp = post(
                 'http://{}:{}/user_locker'.format(config.user_service_ip,
                                                   config.user_service_port),
                 data=data)
             if resp.status_code == 200:
-                print('LockerService: posted to UserService locker id: ', data)
+                logger.info(
+                    'LockerService RabbitMQ receiver: posted to UserService locker id: ',
+                    data)
                 return
             else:
-                print('LockerService: Cannot make POST locker_id')
-        except:
-            print("LockerService: Failed to send locker id")
+                logger.warning(
+                    'LockerService RabbitMQ receiver: Cannot make POST locker_id'
+                )
+        except Exception as e:
+            logger.critical(
+                "LockerService RabbitMQ receiver: exception: {}".format(str(e)))
             return
     else:
+        logger.warning("LockerService RabbitMQ receiver: no free lockers")
         data = {"user_name": body, "locker_id": "no_lockers"}
-        print(data)
         try:
+            logger.info(
+                "LockerService RabbitMQ receiver: trying to post {}".format(
+                    data))
             resp = post(
                 'http://{}:{}/user_locker'.format(config.user_service_ip,
                                                   config.user_service_port),
                 data=data)
             if resp.status_code == 200:
-                print('LockerService: posted to UserService locker id: ', data)
+                logger.info(
+                    'LockerService RabbitMQ receiver: posted to UserService locker id: ',
+                    data)
                 return
             else:
-                print('LockerService: Cannot make POST no lockers')
+                logger.error(
+                    'LockerService RabbitMQ receiver: Cannot make POST no lockers'
+                )
         except:
-            print("LockerService: Failed to send no lockers")
+            logger.critical(
+                "LockerService RabbitMQ receiver: Failed to send no lockers")
 
 
 channel.basic_consume(
     queue='get_locker_id', on_message_callback=callback, auto_ack=True)
 
-print("LockerService - RabbitMQ is waiting for messages. To exit press CTRL+C")
+logger.info(
+    "LockerService RabbitMQ receiver: RabbitMQ is waiting for messages. To exit press CTRL+C"
+)
 channel.start_consuming()
