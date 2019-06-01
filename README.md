@@ -13,12 +13,14 @@
         - [Create Database](#create-database)
         - [Drop Database](#drop-database)
       - [MongoDB](#mongodb)
-        - [Install python lib:](#install-python-lib)
+        - [Install python lib](#install-python-lib)
         - [Create database folders](#create-database-folders)
-        - [Create Database:](#create-database)
-        - [Drop Database:](#drop-database)
+        - [Create Database](#create-database-1)
+        - [Drop Database](#drop-database-1)
     - [RabbitQM Setup](#rabbitqm-setup)
   - [Launching](#launching)
+    - [If you have troubles with creating replica set, run](#if-you-have-troubles-with-creating-replica-set-run)
+    - [Launching with Guake terminal](#launching-with-guake-terminal)
 
 ## Basic architecture
 
@@ -78,7 +80,6 @@ pip install psycopg2
 
 </details>
 
-
 ##### Start PostgreSQL server
 
 (Required before running the app):
@@ -100,8 +101,6 @@ psql -f create_users_db.sql -U postgres \
 psql -f drop_users_db.sql -U postgres
 ```
 
----
-
 #### MongoDB
 
 <details>
@@ -112,7 +111,7 @@ sudo apt update
 sudo apt install -y mongodb
 ```
 
-##### Install python lib:
+##### Install python lib
 
 ```bash
 python -m pip install pymongo
@@ -127,19 +126,20 @@ cd mongo_db
 mkdir db0 db1 db2
 ```
 
-##### Create Database:
+##### Create Database
 
 ```bash
 python locker_service/mongo_db/migrations/create_lockers_db.py
 ```
 
-##### Drop Database:
+##### Drop Database
 
 ```bash
 python locker_service/mongo_db/migrations/drop_mongo_db.py`
 ```
 
 ### RabbitQM  Setup
+
 To configure hostname, edit `hosts`
 
 ``` bash
@@ -264,7 +264,7 @@ Initialize replica set
 python locker_service/mongo_db/migrations/create_lockers_db.py
 ```
 
-If you have troubles with creating replica set, run
+### If you have troubles with creating replica set, run
 
 ``` bash
 mongod --port 27017 --dbpath ./db0 --replSet lockers_rs
@@ -296,3 +296,15 @@ without command
 ```` bash
 python locker_service/mongo_db/migrations/create_lockers_db.py
 ````
+
+### Launching with Guake terminal
+
+From LockerApp folder:
+
+``` bash
+# to run LockerApp, LockerService, 3 mongos, Hazelcast and RabbitMQ
+./scripts/locker_app_run.sh
+
+# to run LockerApp(second instance), UserService, Hazelcast and RabbitMQ
+./scripts/user_service_run.sh
+```
