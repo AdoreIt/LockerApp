@@ -1,9 +1,10 @@
 import os
 import sys
+import json
 
 import pika
 import requests
-from flask import Flask, request
+from flask import Flask, request, make_response
 from flask_restful import Resource, Api, reqparse
 
 sys.path.append(os.path.abspath(os.path.join('config')))
@@ -50,13 +51,10 @@ def add_user_to_db(user_name):
     """
     Adding user with name user_name to db
     """
-    print("DB add_user_to_db")
-    print(user_name)
     cursor.execute(
         "insert into users (user_name, locker_id) values ('{}', {}); commit;".
         format(user_name, "NULL"))
-
-    print("DB added user to db")
+    print("DB added user {} to db".format(user_name))
 
 
 def delete_user_from_db(user_name):
@@ -87,6 +85,7 @@ def get_users_lockers_dict_from_db():
     """
     print("DB users_db: getting users from db")
     cursor.execute("SELECT * FROM users;")
+    print("DB users_db: got users from db")
     data = cursor.fetchall()
     users_lockers = {}
     for row in data:
@@ -106,12 +105,33 @@ def get_users_locker(user_name):
     if user_name in users_lockers:
         locker = users_lockers[user_name]
         if locker is not None:
-            return locker
+            return {"status": "success", "data": locker}
         else:
-            get_locker_from_locker_service(message=user_name)
-            return "user without locker"
+            return {"status": "failed", "data": "user_without_locker"}
     else:
-        return "user not exists"
+        return {"status": "failed", "data": "user_not_exists"}
+
+
+def form_response(message_text, data):
+    """
+    Request structure:
+    data = {
+        "response": {
+            "message": "message_text",
+            "data": {
+                "user_name": "Natalie", # or any other data
+                "locker_id": None       # or any other data
+            }
+        }
+    }
+    """
+    return {"response": {"message": message_text, "data": data}}
+
+
+def resp_json(data, code):
+    """Makes a Flask response with a JSON encoded body"""
+    resp = make_response(json.dumps(data), code)
+    return resp
 
 
 class Users(Resource):
@@ -123,7 +143,7 @@ class Users(Resource):
             print(users)
             users_answer = {'users': users}
 
-            print("Users: sending answer")
+            print("Users: sending answer {}".format(users_answer))
             return users_answer, 200
         except:
             print("Users: troubles")
@@ -132,28 +152,79 @@ class Users(Resource):
 
 class UserService(Resource):
     def get(self):
+        """
+        Request structure:
+        request = {"message" : "message_text", "user_name" : "name}
+        """
         print("UserService: get")
         try:
-            print("UserService: trying to get user's locker")
-            user_name_req = request.form['user_name']
-            print("UserService: received request", user_name_req)
+            print("UserService: parsing request")
+            message_req = request.form.to_dict()
 
-            users_locker = get_users_locker(user_name_req)  # answer
-            print("UserService: ", users_locker)
+            print("UserService: received request", message_req)
 
-            if users_locker == "user not exists":
-                add_user_to_db(user_name_req)
-                users_locker = get_users_locker(user_name_req)
-                print(users_locker)
+            if message_req["message"] == "check_user":
+                user_name = message_req["user_name"]
 
-            print("UserService: ", users_locker)
-            result = {'users_locker': users_locker}
+                print("UserService: checking user {} in db".format(user_name))
+                check_user_db_answer = get_users_locker(user_name)
 
-            print("UserService: sending answer")
-            return result, 200
-        except:
-            print("UserService: 'Cannot connect to locker service'")
-            return 'Cannot connect to locker service', 404
+                if check_user_db_answer["status"] == "failed":
+                    answer = form_response(check_user_db_answer["data"], None)
+                    # user_without_locker or user_not_exists
+                    print("UserService: sending answer {}".format(answer))
+                    return resp_json(answer, 400)
+                else:
+                    answer = form_response(
+                        "user_with_locker", {
+                            "user_name": user_name,
+                            "locker_id": check_user_db_answer["data"]
+                        })
+                    print("UserService: sending answer {}".format(answer))
+                    return resp_json(answer, 200)
+
+            elif message_req["message"] == "get_locker_for_user":
+                user_name = message_req["user_name"]
+
+                print(
+                    "UserService: sending rabbit request to get locker for user {}"
+                    .format(user_name))
+                get_locker_from_locker_service(message=user_name)
+
+                print(
+                    "UserService: sent rabbit request to get locker for user {}"
+                    .format(user_name))
+                answer = form_response("sent rabbit request", None)
+
+                print("UserService: sending answer {}".format(answer))
+                return resp_json(answer, 200)
+
+            elif message_req["message"] == "add_user":
+                user_name = message_req["user_name"]
+
+                print("UserService: adding user {} to db".format(user_name))
+                add_user_to_db(user_name)
+
+                print("UserService: added user {} to db".format(user_name))
+                answer = form_response("added user to db", None)
+
+                print("UserService: sending answer {}".format(answer))
+                return resp_json(answer, 200)
+
+            elif message_req["message"] == "delete_user":
+                user_name = message_req["user_name"]
+                print("UserService: deleting user {} from db".format(user_name))
+                delete_user_from_db(user_name)
+
+                print("UserService: deleted user {} from db".format(user_name))
+                answer = form_response("deleted user from db", None)
+
+                print("UserService: sending answer {}".format(answer))
+                return resp_json(answer, 200)
+
+        except Exception as e:
+            print("UserService: exception - {}".format(str(e)))
+            return "Error {}".format(str(e)), 404
 
 
 class UserLocker(Resource):
@@ -173,9 +244,10 @@ class UserLocker(Resource):
                     answer = user_name_locker["locker_id"]
                     print("UserLocker: sending {}".format(
                         answer))  #locker_db_error
-                    return answer, 201
-            else:
-                print("UserLocker: no free lockers")
+                    return answer, 200
+            elif user_name_locker["locker_id"] == "no_lockers":
+                print("UserLocker: no free lockers. Sending answer")
+                return user_name_locker["locker_id"], 200
             return "Received locker_id for user!", 200
         except:
             print(
@@ -188,3 +260,13 @@ api.add_resource(UserLocker, '/user_locker')
 if __name__ == '__main__':
     app.run(
         host=config.user_service_ip, port=config.user_service_port, debug=True)
+
+data = {
+    "request": {
+        "message": "message_text",
+        "data": {
+            "user_name": "Natalie",
+            "locker_id": None
+        }
+    }
+}
