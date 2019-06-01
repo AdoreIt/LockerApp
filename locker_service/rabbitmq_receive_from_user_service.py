@@ -83,12 +83,14 @@ def callback_get(ch, method, properties, body):
 
 
 def callback_free(ch, method, properties, body):
-    body = str(body.decode("utf-8"))
-    data = {"user_name": body, "locker_id": "NULL"}
+    body = json.loads(body.decode("utf-8"))
+    name = body["user_name"]
+    locker_id = body["locker_id"]
+    data = {"user_name": name, "locker_id": "NULL"}
     logger.info(
         "LockerService RabbitMQ receiver: RabbitMQ received: {}".format(body))
     logger.info("LockerService RabbitMQ receiver: frees up locker")
-    if update_lockers_db(int(body), True):
+    if update_lockers_db(int(locker_id), True):
         try:
             logger.info(
                 "LockerService RabbitMQ receiver: trying to post {}".format(
