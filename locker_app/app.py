@@ -4,7 +4,7 @@ import json
 import random
 
 import requests
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, make_response, flash
 
 sys.path.append(os.path.abspath(os.path.join('config')))
 from config import read_config
@@ -55,26 +55,70 @@ def check():
         elif resp.status_code == 400:
             resp = json.loads(resp.text)
             locker_answer = resp["response"]
+
             if locker_answer["message"] == "user_not_exists":
                 no_user_message = "User {} doesn't exist".format(name)
-                return render_template(
-                    "add_user.html",
+                resp = make_response(render_template(
+                    "check.html",
                     info=no_user_message,
-                    animal_class=animal_class, animal_name=animal_name)
+                    no_user=True,
+                    animal_class=animal_class, animal_name=animal_name))
+                resp.set_cookie("user_name", name)
+                return resp
+
             if locker_answer["message"] == "user_without_locker":
                 no_locker_message = "User {} has no locker".format(name)
                 return render_template(
-                    "add_locker.html",
+                    "check.html",
                     info=no_locker_message,
                     animal_class=animal_class, animal_name=animal_name)
 
     except Exception as e:
         print("Exception", e)
-        error = "Service temporary anavailable"
+        error = e
 
     return render_template(
         "check.html",
         success=message,
+        error=error,
+        animal_class=animal_class, animal_name=animal_name)
+
+
+@app.route("/adduser", methods=['POST'])
+def add_user():
+    print("LockerApp: In add user function")
+    message = None
+    error = None
+    name = request.cookies.get("user_name")
+    data = {"message": "add_user", "user_name": name}
+    print("LockerApp: Sending request to UserService: ", data)
+    try:
+        resp = requests.get(
+            'http://{0}:{1}/users_service'.format(config.user_service_ip,
+                                                  config.user_service_port),
+            data=data)
+
+        if resp.status_code == 200:
+            resp = json.loads(resp.text)
+            message = "User {} added. \
+                Return to Home screen to continue".format(name)
+        elif resp.status_code == 404:
+            resp = json.loads(resp.text)
+            error = "User {} already exists. \
+                Return to Home screen to continue".format(name)
+            return render_template(
+                "check.html",
+                error=error,
+                animal_class=animal_class, animal_name=animal_name)
+
+    except Exception as e:
+        print("Exception", e)
+        message = "LockerApp: Adding user service temporary anavailable"
+
+    return render_template(
+        "check.html",
+        success=message,
+        error=error,
         animal_class=animal_class, animal_name=animal_name)
 
 
