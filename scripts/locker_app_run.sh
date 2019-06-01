@@ -21,13 +21,13 @@ guake -e "python locker_service/rabbitmq_receive_from_user_service.py"
 #create mongo tab
 guake --new-tab $locker_app_path -r "Mongo"
 guake -e "$anaconda_env_activate && cd locker_service/mongo_db  && clear"
-guake -e "sudo mongod --port 27017 --dbpath ./db0 --replSet lockers_rs"
+guake -e "mongod --port 27017 --dbpath ./db0 --replSet lockers_rs"
 
 guake --split-vertical -e "$anaconda_env_activate  && clear"
-guake -e "sudo mongod --port 27018 --dbpath ./db1 --replSet lockers_rs"
+guake -e "mongod --port 27018 --dbpath ./db1 --replSet lockers_rs"
 
 guake --split-horizontal -e "$anaconda_env_activate  && clear"
-guake -e "sudo mongod --port 27019 --dbpath ./db2 --replSet lockers_rs"
+guake -e "mongod --port 27019 --dbpath ./db2 --replSet lockers_rs"
 
 # create hazelcast and rabbitmq
 guake --new-tab $locker_app_path -r "HazelRabbit"
