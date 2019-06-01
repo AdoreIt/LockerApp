@@ -2,9 +2,10 @@ import os
 import sys
 import json
 import random
+from time import sleep
 
 import requests
-from flask import Flask, render_template, request, redirect, url_for, make_response, flash
+from flask import Flask, render_template, request, make_response
 
 sys.path.append(os.path.abspath(os.path.join('config')))
 from config import read_config
@@ -68,10 +69,13 @@ def check():
 
             if locker_answer["message"] == "user_without_locker":
                 no_locker_message = "User {} has no locker".format(name)
-                return render_template(
+                resp = make_response(render_template(
                     "check.html",
                     info=no_locker_message,
-                    animal_class=animal_class, animal_name=animal_name)
+                    no_locker=True,
+                    animal_class=animal_class, animal_name=animal_name))
+                resp.set_cookie("user_name", name)
+                return resp
 
     except Exception as e:
         print("Exception", e)
@@ -114,6 +118,86 @@ def add_user():
     except Exception as e:
         print("Exception", e)
         message = "LockerApp: Adding user service temporary anavailable"
+
+    return render_template(
+        "check.html",
+        success=message,
+        error=error,
+        animal_class=animal_class, animal_name=animal_name)
+
+
+@app.route("/addlocker", methods=['GET', 'POST'])
+def add_locker():
+    print("LockerApp: In add locker function")
+    message = None
+    error = None
+    name = request.cookies.get("user_name")
+    data = {"message": "get_locker_for_user", "user_name": name}
+    print("LockerApp: Sending request to UserService: ", data)
+    try:
+        resp = requests.get(
+            'http://{0}:{1}/users_service'.format(config.user_service_ip,
+                                                  config.user_service_port),
+            data=data)
+        print(resp.text)
+
+        if resp.status_code == 200:
+            data = {"message": "check_user", "user_name": name}
+            print("LockerApp: Sending request to UserService: ", data)
+            sleep(0.5)
+            try:
+                resp = requests.get(
+                    'http://{0}:{1}/users_service'.format(
+                        config.user_service_ip, config.user_service_port),
+                    data=data)
+
+                print(resp.text)
+
+                if resp.status_code == 200:
+                    resp = json.loads(resp.text)
+                    print("200")
+                    locker_answer = resp["response"]["data"]["locker_id"]
+                    message = "User {} occupies locker {}. \
+                        Return to Home screen to continue".format(
+                            name, locker_answer)
+                elif resp.status_code == 400:
+                    print("400")
+                    resp = json.loads(resp.text)
+                    locker_answer = resp["response"]
+
+                    if locker_answer["message"] == "user_without_locker":
+                        no_locker_message = "No free lockers found. \
+                            Return to Home screen to continue"
+                        resp = make_response(render_template(
+                            "check.html",
+                            info=no_locker_message,
+                            no_locker=True,
+                            animal_class=animal_class,
+                            animal_name=animal_name))
+                        resp.set_cookie("user_name", name)
+                        return resp
+
+            except Exception as e:
+                print("Exception", e)
+                error = e
+
+            return render_template(
+                "check.html",
+                success=message,
+                error=error,
+                animal_class=animal_class, animal_name=animal_name)
+
+        else:
+            error = "Error occured. \
+                Return to Home screen to continue".format(name)
+            return render_template(
+                "check.html",
+                error=error,
+                animal_class=animal_class, animal_name=animal_name)
+
+    except Exception as e:
+        print("Exception", e)
+        error = e
 
     return render_template(
         "check.html",
