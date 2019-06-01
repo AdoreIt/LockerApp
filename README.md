@@ -19,6 +19,7 @@
         - [Drop Database:](#drop-database)
     - [RabbitQM Setup](#rabbitqm-setup)
   - [Launching](#launching)
+    - [Launching with Guake terminal](#launching-with-guake-terminal)
 
 ## Basic architecture
 
@@ -99,8 +100,6 @@ psql -f create_users_db.sql -U postgres \
 ``` bash
 psql -f drop_users_db.sql -U postgres
 ```
-
----
 
 #### MongoDB
 
@@ -262,4 +261,16 @@ Initialize replica set
 
 ```bash
 python locker_service/mongo_db/migrations/create_mongo_db.py
+```
+
+### Launching with Guake terminal
+
+From LockerApp folder:
+
+``` bash
+# to run LockerApp, LockerService, 3 mongos, Hazelcast and RabbitMQ
+./scripts/locker_app_run.sh
+
+# to run LockerApp(second instance), UserService, Hazelcast and RabbitMQ
+./scripts/user_service_run.sh
 ```
