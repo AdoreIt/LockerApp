@@ -7,24 +7,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css' crossorigin='anonymous'>
     <style>
-        @media (min-width: 10px) {
-            .navbar-nav.navbar-center {
-                position: absolute;
-                left: 50%;
-                top: 3%;
-                transform: translatex(-50%);
-            }
-        }
-
-        @media (min-width: 10px) {
-            .navbar-nav.navbar-right {
-                position: absolute;
-                right: 10%;
-                top: 3%;
-                transform: translatex(-50%);
-            }
-        }
-
         .navbar {
             margin-bottom: 20px;
         }
@@ -48,14 +30,10 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-info">
-        <div class="navbar-brand pull-left"> LockerApp </div>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-alt"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="navbar-collapse collapse dual-collapse2 navbar-alt" style="text-align:center">
-            <ul class="nav navbar-nav navbar-center navbar-collapse collapse navbar-alt">
+    <nav class="navbar bg-info">
+        <div class="container-fluid">
+            <div class="navbar-brand">LockerApp</div>
+            <ul class="nav" style="text-align:center">
                 <li class="nav-item">
                     <a class="nav-link" href="/">
                         <i class="fas fa-home"></i>
@@ -75,14 +53,13 @@
                     </a>
                 </li>
             </ul>
-            <ul class="nav navbar-nav navbar-right navbar-collapse collapse navbar-alt">
+            <ul class="nav navbar-nav navbar-right" style="text-align:center">
                 <li class="nav-item">
                     <a class="nav-link">
                         {% block userlogo %}{% endblock %}
                     </a>
                 </li>
             </ul>
-        </div>
         </div>
     </nav>
     {% block body %}{% endblock %}
