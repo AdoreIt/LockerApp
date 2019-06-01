@@ -1,17 +1,31 @@
 {% extends 'layout.html' %}
 
+{% block userlogo %}
+<i class="{{animal_class}}"></i>
+<p>{{animal_name}}</p>
+{% endblock %}
+
 {% block body %}
 
 {% if data %}
 <div class="list-group" name="list-group"></div>
 {% for locker_id, is_empty in data.items() %}
+
 {% if is_empty == True %}
 <p class="list-group-item list-group-item-action list-group-item-success">Locker {{locker_id}}</p>
 {% endif %}
+
 {% if is_empty == False %}
 <p class="list-group-item list-group-item-action list-group-item-danger">Locker {{locker_id}}</p>
 {% endif %}
+
 {% endfor %}
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-danger">
+    <strong>Error!</strong> {{ error }}
 </div>
 {% endif %}
 

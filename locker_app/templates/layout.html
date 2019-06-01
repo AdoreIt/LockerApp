@@ -1,20 +1,68 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>LockerApp</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    </head>
-    <body>
-        <div class="jumbotron text-center">
-                <h1>Welcome To LockerApp</h1>
-                {% if session.logged_in == NULL %}
-                    <a href="/" class="btn btn-warning btn-lg">Home</a>
-                    <a href="/users" class="btn btn-primary btn-lg">Users</a>
-                    <a href="/lockers" class="btn btn-success btn-lg">Lockers</a>
-                {% endif %}
-                </div>
-        {% block body %}{% endblock %}
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    </body>
+
+<head>
+    <meta charset="utf-8">
+    <title>LockerApp</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css' crossorigin='anonymous'>
+    <style>
+        .navbar {
+            margin-bottom: 20px;
+        }
+
+        .navbar .nav-item .nav-link {
+            color: white;
+        }
+
+        .navbar .navbar-brand {
+            color: white;
+        }
+
+        .navbar .nav-item .nav-link:hover {
+            color: rgb(231, 228, 228);
+        }
+
+        .navbar .navbar-brand:hover {
+            color: rgb(231, 228, 228);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar bg-info">
+        <div class="container-fluid">
+            <div class="navbar-brand">LockerApp</div>
+            <ul class="nav" style="text-align:center">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        <i class="fas fa-home"></i>
+                        <p>Home</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/users">
+                        <i class="fas fa-users"></i>
+                        <p>Users</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/lockers">
+                        <i class="fas fa-boxes"></i>
+                        <p>Lockers</p>
+                    </a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right" style="text-align:center">
+                <li class="nav-item">
+                    <a class="nav-link">
+                        {% block userlogo %}{% endblock %}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    {% block body %}{% endblock %}
+</body>
+
 </html>
