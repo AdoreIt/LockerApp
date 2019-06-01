@@ -66,7 +66,7 @@ def delete_user_from_db(user_name):
     Delete user with name user_name from db
     """
     cursor.execute(
-        "DELETE from users WHERE user_name = {}; commit;".format(user_name))
+        "DELETE from users WHERE user_name = '{}'; commit;".format(user_name))
 
 
 def update_locker_for_user_in_db(user_name, locker_id):
@@ -165,7 +165,7 @@ class UserService(Resource):
             logger.info("UserService: parsing request")
             message_req = request.form.to_dict()
 
-            logger.info("UserService: received request", message_req)
+            logger.info("UserService: received request {}".format(message_req))
 
             if message_req["message"] == "check_user":
                 user_name = message_req["user_name"]
