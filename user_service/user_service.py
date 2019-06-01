@@ -246,11 +246,6 @@ class UserService(Resource):
                     locker_id = db_answer_dict["response"]["data"]["locker_id"]
 
                     logger.info(
-                        "UserService: making request to DB to free locker of user {}"
-                        .format(user_name))
-                    update_locker_for_user_in_db(user_name, "NULL")
-
-                    logger.info(
                         "UserService: sending rabbit request to free {}'s locker with id {}"
                         .format(user_name, locker_id))
                     free_locker_id_rabbitqm(message=locker_id)
@@ -307,7 +302,7 @@ class UserLocker(Resource):
                 "UserLocker: parcing post from LockerService RabbitMQ receiver")
             user_name_locker = request.form.to_dict()
             logger.info(
-                "UserLocker: parsed '{}' from LockerService RabbitMQ receiver".
+                "UserLocker: parsed {} from LockerService RabbitMQ receiver".
                 format(user_name_locker))
 
             locker_rabbitmq_answer = user_name_locker["locker_id"]
