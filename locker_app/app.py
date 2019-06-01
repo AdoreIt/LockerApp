@@ -56,11 +56,13 @@ def check():
             logger.info("LockerApp received response that user {} has locker {}".format(name, locker_answer))
             message = "User {} occupies locker {}".format(
                 name, locker_answer)
-            return render_template(
+            resp = make_response(render_template(
                 "check.html",
-                success=message,
+                info=message,
                 locker_exists=True,
-                animal_class=animal_class, animal_name=animal_name)
+                animal_class=animal_class, animal_name=animal_name))
+            resp.set_cookie("user_name", name)
+            return resp
         elif resp.status_code == 400:
             resp = json.loads(resp.text)
             locker_answer = resp["response"]
@@ -202,11 +204,13 @@ def add_locker():
                     logger.info("LockerApp received response that user {} occupies locker {}", name, locker_answer)
                     message = "User {} occupies locker {}. Return to Home screen to continue".format(
                             name, locker_answer)
-                    return render_template(
+                    resp = make_response(render_template(
                         "check.html",
-                        success=message,
+                        info=message,
                         locker_exists=True,
-                        animal_class=animal_class, animal_name=animal_name)
+                        animal_class=animal_class, animal_name=animal_name))
+                    resp.set_cookie("user_name", name)
+                    return resp
                 elif resp.status_code == 400:
                     resp = json.loads(resp.text)
                     locker_answer = resp["response"]
@@ -234,7 +238,90 @@ def add_locker():
                 animal_class=animal_class, animal_name=animal_name)
 
         else:
-            logger.error("Error while adding user")
+            logger.error("Error while adding locker")
+            error = "Error occurred. Return to Home screen to continue".format(name)
+            return render_template(
+                "check.html",
+                error=error,
+                animal_class=animal_class, animal_name=animal_name)
+
+    except Exception as e:
+        logger.critical("Exception {}".format(e))
+        error = str(e)
+
+    return render_template(
+        "check.html",
+        success=message,
+        error=error,
+        animal_class=animal_class, animal_name=animal_name)
+
+
+@app.route("/delete_locker", methods=['GET', 'POST'])
+def delete_locker():
+    logger.info("LockerApp: In delete locker function")
+    message = None
+    error = None
+    name = request.cookies.get("user_name")
+    data = {"message": "free_users_locker", "user_name": name}
+    logger.info("LockerApp: Sending request to UserService: {}".format(data))
+    try:
+        resp = requests.get(
+            'http://{0}:{1}/users_service'.format(config.user_service_ip,
+                                                  config.user_service_port),
+            data=data)
+        if resp.status_code == 200:
+            data = {"message": "check_user", "user_name": name}
+            logger.info("LockerApp: Sending request to UserService: {}".format(data))
+            sleep(0.5)
+            try:
+                resp = requests.get(
+                    'http://{0}:{1}/users_service'.format(
+                        config.user_service_ip, config.user_service_port),
+                    data=data)
+
+                if resp.status_code == 200:
+                    resp = json.loads(resp.text)
+                    locker_answer = resp["response"]["data"]["locker_id"]
+                    logger.info("LockerApp received response that user {} occupies locker {}", name, locker_answer)
+                    message = "User {} occupies locker {}. Return to Home screen to continue".format(
+                            name, locker_answer)
+                    resp = make_response(render_template(
+                        "check.html",
+                        info=message,
+                        locker_exists=True,
+                        animal_class=animal_class, animal_name=animal_name))
+                    resp.set_cookie("user_name", name)
+                    return resp
+                elif resp.status_code == 400:
+                    resp = json.loads(resp.text)
+                    locker_answer = resp["response"]
+                    logger.warning("LockerApp received: {}".format(locker_answer))
+
+                    if locker_answer["message"] == "user_without_locker":
+                        no_locker_message = "User {} has no locker. Return to Home screen to continue".format(
+                            name
+                        )
+                        resp = make_response(render_template(
+                            "check.html",
+                            info=no_locker_message,
+                            no_locker=True,
+                            user_exists=True,
+                            animal_class=animal_class,
+                            animal_name=animal_name))
+                        resp.set_cookie("user_name", name)
+                        return resp
+
+            except Exception as e:
+                logger.critical("Exception {}".format(e))
+                error = str(e)
+
+            return render_template(
+                "check.html",
+                error=error,
+                animal_class=animal_class, animal_name=animal_name)
+
+        else:
+            logger.error("Error while deleting locker")
             error = "Error occurred. Return to Home screen to continue".format(name)
             return render_template(
                 "check.html",

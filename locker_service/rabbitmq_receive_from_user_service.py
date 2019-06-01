@@ -21,9 +21,10 @@ connection = pika.BlockingConnection(
 channel = connection.channel()
 
 channel.queue_declare(queue='get_locker_id', durable=True)
+channel.queue_declare(queue='free_locker_id', durable=True)
 
 
-def callback(ch, method, properties, body):
+def callback_get(ch, method, properties, body):
     body = str(body.decode("utf-8"))
     logger.info(
         "LockerService RabbitMQ receiver: RabbitMQ received: {}".format(body))
@@ -70,8 +71,7 @@ def callback(ch, method, properties, body):
                 data=data)
             if resp.status_code == 200:
                 logger.info(
-                    'LockerService RabbitMQ receiver: posted to UserService locker id: ',
-                    data)
+                    'LockerService RabbitMQ receiver: posted to UserService locker id: {}'.format(data))
                 return
             else:
                 logger.error(
@@ -82,8 +82,38 @@ def callback(ch, method, properties, body):
                 "LockerService RabbitMQ receiver: Failed to send no lockers")
 
 
+def callback_free(ch, method, properties, body):
+    body = str(body.decode("utf-8"))
+    logger.info(
+        "LockerService RabbitMQ receiver: RabbitMQ received: {}".format(body))
+    logger.info("LockerService RabbitMQ receiver: frees up locker")
+    if update_lockers_db(int(body), True):
+        try:
+            logger.info(
+                "LockerService RabbitMQ receiver: trying to post {}".format(
+                    body))
+            resp = post(
+                'http://{}:{}/user_locker'.format(config.user_service_ip,
+                                                  config.user_service_port),
+                data=body)
+            if resp.status_code == 200:
+                logger.info(
+                    'LockerService RabbitMQ receiver: posted to UserService: {}'.format(body))
+                return
+            else:
+                logger.error('LockerService RabbitMQ receiver: Cannot make POST about free locker')
+        except Exception as e:
+            logger.critical(
+                "LockerService RabbitMQ receiver: Failed to send no lockers {}".format(e))
+    else:
+        logger.warning("Cannot empty locker: DB errors")
+
+
 channel.basic_consume(
-    queue='get_locker_id', on_message_callback=callback, auto_ack=True)
+    queue='get_locker_id', on_message_callback=callback_get, auto_ack=True)
+
+channel.basic_consume(
+    queue='free_locker_id', on_message_callback=callback_free, auto_ack=True)
 
 logger.info(
     "LockerService RabbitMQ receiver: RabbitMQ is waiting for messages. To exit press CTRL+C"
