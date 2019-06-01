@@ -6,12 +6,16 @@ from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 
 sys.path.append(os.path.abspath(os.path.join('config')))
+sys.path.append(os.path.abspath(os.path.join('utils')))
 from config import read_config
+from logger import setup_logger
 
 from pymongo import MongoClient
 from pymongo.read_preferences import ReadPreference
 
 config = read_config()
+logger = setup_logger()
+
 app = Flask(__name__)
 api = Api(app)
 
@@ -63,20 +67,19 @@ def get_empty_locker_from_db():
 
 class LockerService(Resource):
     def get(self):
-        print("LockerService: get request to get lockers")
+        logger.info("LockerService: get request to get lockers")
         try:
-            print("LockerService: trying")
             answer = {}
             answer_cursor = get_lockers_from_db()
             for doc in answer_cursor.find():
                 answer.update({doc["_id"]: doc["free"]})
 
-            print("LockerService: ", answer)
+            logger.info("LockerService got answer from DB: {}".format(answer))
             answer = {i: answer[i] for i in sorted(answer.keys())}
             result = {'lockers': answer}
             return result, 200
-        except:
-            print("LockerService: cannot connect to db")
+        except Exception as e:
+            logger.critical(e)
             return '', 404
 
 

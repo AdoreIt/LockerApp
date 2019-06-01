@@ -12,7 +12,7 @@
 <div class="alert alert-info">
     <strong>Info!</strong> {{ info }}
     <div class="input-group-append">
-        {% if user exists %}
+        {% if user_exists %}
         <form action="/delete_user" method="post">
             <button type="submit" class="btn btn-outline-secondary">Delete user</button>
         </form>
