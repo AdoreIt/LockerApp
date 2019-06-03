@@ -6,7 +6,7 @@ import hazelcast
 from time import sleep
 
 import requests
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response, redirect, url_for
 
 sys.path.append(os.path.abspath(os.path.join('config')))
 sys.path.append(os.path.abspath(os.path.join('utils')))
@@ -71,12 +71,7 @@ def change_animal():
     map.clear()
     animal = animal_state()
     print("Animal state: ", animal)
-    resp = make_response(
-        render_template(
-            "home.html",
-            animal_class=animal["class"],
-            animal_name=animal["name"]))
-    return resp
+    return redirect(url_for('home'))
 
 
 @app.route('/', methods=['POST'])
@@ -89,7 +84,7 @@ def check():
     name = request.form.get("name", "")
     data = {"message": "check_user", "user_name": name}
     logger.info("LockerApp: Sending request to UserService: {}".format(data))
-    animal = json.loads(animal_state())
+    animal = animal_state()
     try:
         resp = requests.get(
             'http://{0}:{1}/users_service'.format(config.user_service_ip,
@@ -102,7 +97,7 @@ def check():
                 "LockerApp received response that user {} has locker {}".format(
                     name, locker_answer))
             message = "User {} occupies locker {}".format(name, locker_answer)
-            animal = json.loads(animal_state())
+            animal = animal_state()
             resp = make_response(
                 render_template(
                     "check.html",
@@ -161,7 +156,7 @@ def add_user():
     name = request.cookies.get("user_name")
     data = {"message": "add_user", "user_name": name}
     logger.info("LockerApp: Sending request to UserService: {}".format(data))
-    animal = json.loads(animal_state())
+    animal = animal_state()
     try:
         resp = requests.get(
             'http://{0}:{1}/users_service'.format(config.user_service_ip,
@@ -204,7 +199,7 @@ def delete_user():
     name = request.cookies.get("user_name")
     data = {"message": "delete_user", "user_name": name}
     logger.info("LockerApp: Sending request to UserService: {}".format(data))
-    animal = json.loads(animal_state())
+    animal = animal_state()
     try:
         resp = requests.get(
             'http://{0}:{1}/users_service'.format(config.user_service_ip,
@@ -246,7 +241,7 @@ def add_locker():
     error = None
     name = request.cookies.get("user_name")
     data = {"message": "get_locker_for_user", "user_name": name}
-    animal = json.loads(animal_state())
+    animal = animal_state()
     logger.info("LockerApp: Sending request to UserService: {}".format(data))
     try:
         resp = requests.get(
@@ -339,7 +334,7 @@ def delete_locker():
     error = None
     name = request.cookies.get("user_name")
     data = {"message": "free_users_locker", "user_name": name}
-    animal = animal.state()
+    animal = animal_state()
     logger.info("LockerApp: Sending request to UserService: {}".format(data))
     try:
         resp = requests.get(
@@ -432,7 +427,7 @@ def delete_locker():
 def users():
     error = None
     resp = None
-    animal = json.loads(animal_state())
+    animal = animal_state()
     try:
         logger.info("LockerApp: requesting from UserService")
         resp = requests.get('http://{0}:{1}/users'.format(
@@ -471,7 +466,7 @@ def users():
 def lockers():
     error = None
     resp = None
-    animal = json.loads(animal_state())
+    animal = animal_state()
     try:
         logger.info("LockerApp: requesting from LockerService")
         resp = requests.get(

@@ -53,13 +53,14 @@
                     </a>
                 </li>
             </ul>
-            <ul class="nav navbar-nav navbar-right" style="text-align:center">
+            <ul class="nav navbar-nav navbar-right" style="text-align:center;">
                 <li class="nav-item">
-                    <form action="" method="post" role="form">
-                        <input type="submit" action="/change_animal" method="post">
-                        <a class="nav-link" href="/">
+                    <form action="" method="post">
+                        <a class="nav-link" href="">
                             {% block userlogo %}{% endblock %}
                         </a>
+                        <input type="submit" value="?" action="/change_animal" method="post"
+                            class="btn btn-info text-info" style=" height:10%; font-size: smaller;">
                     </form>
                 </li>
             </ul>
