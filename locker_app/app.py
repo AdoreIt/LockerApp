@@ -20,6 +20,12 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['SECRET_KEY'] = '2'
 
+config_hazel = hazelcast.ClientConfig()
+client = hazelcast.HazelcastClient(config_hazel)
+
+map = client.get_map("animal_map").blocking()
+map.clear()
+
 animal_dict = {
     "cat": "Furry",
     "crow": "Black",
@@ -38,10 +44,7 @@ animal_dict = {
 
 def animal_state():
     animal = map.get("animal")
-    if animal is not None:
-        animal_class = animal["class"]
-        animal_name = animal["name"]
-    else:
+    if animal is None:
         animal = random.choice(list(animal_dict.keys()))
         animal_class = "fas fa-" + animal
         animal_name = animal_dict[animal] + " " + animal
@@ -50,21 +53,29 @@ def animal_state():
     return animal
 
 
-# animal = random.choice(list(animal_dict.keys()))
-# animal_class = "fas fa-" + animal
-# animal_name = animal_dict[animal] + " " + animal
-
-
 @app.route('/')
 def home():
     animal = animal_state()
-    print("AAAAAAAANIMAL: ", animal)
+    print("Animal state: ", animal)
     resp = make_response(
         render_template(
             "home.html",
             animal_class=animal["class"],
             animal_name=animal["name"]))
-    resp.set_cookie("animal_login", json.dumps(animal))
+    return resp
+
+
+@app.route('/', methods=['POST'])
+def change_animal():
+    logger.info("Change animal state")
+    map.clear()
+    animal = animal_state()
+    print("Animal state: ", animal)
+    resp = make_response(
+        render_template(
+            "home.html",
+            animal_class=animal["class"],
+            animal_name=animal["name"]))
     return resp
 
 
@@ -78,7 +89,7 @@ def check():
     name = request.form.get("name", "")
     data = {"message": "check_user", "user_name": name}
     logger.info("LockerApp: Sending request to UserService: {}".format(data))
-    animal = json.loads(animal_state)
+    animal = json.loads(animal_state())
     try:
         resp = requests.get(
             'http://{0}:{1}/users_service'.format(config.user_service_ip,
@@ -91,7 +102,7 @@ def check():
                 "LockerApp received response that user {} has locker {}".format(
                     name, locker_answer))
             message = "User {} occupies locker {}".format(name, locker_answer)
-            animal = json.loads(animal_state)
+            animal = json.loads(animal_state())
             resp = make_response(
                 render_template(
                     "check.html",
@@ -150,7 +161,7 @@ def add_user():
     name = request.cookies.get("user_name")
     data = {"message": "add_user", "user_name": name}
     logger.info("LockerApp: Sending request to UserService: {}".format(data))
-    animal = json.loads(animal_state)
+    animal = json.loads(animal_state())
     try:
         resp = requests.get(
             'http://{0}:{1}/users_service'.format(config.user_service_ip,
@@ -193,7 +204,7 @@ def delete_user():
     name = request.cookies.get("user_name")
     data = {"message": "delete_user", "user_name": name}
     logger.info("LockerApp: Sending request to UserService: {}".format(data))
-    animal = json.loads(animal_state)
+    animal = json.loads(animal_state())
     try:
         resp = requests.get(
             'http://{0}:{1}/users_service'.format(config.user_service_ip,
@@ -235,7 +246,7 @@ def add_locker():
     error = None
     name = request.cookies.get("user_name")
     data = {"message": "get_locker_for_user", "user_name": name}
-    animal = json.loads(animal_state)
+    animal = json.loads(animal_state())
     logger.info("LockerApp: Sending request to UserService: {}".format(data))
     try:
         resp = requests.get(
@@ -421,7 +432,7 @@ def delete_locker():
 def users():
     error = None
     resp = None
-    animal = json.loads(animal_state)
+    animal = json.loads(animal_state())
     try:
         logger.info("LockerApp: requesting from UserService")
         resp = requests.get('http://{0}:{1}/users'.format(
@@ -460,7 +471,7 @@ def users():
 def lockers():
     error = None
     resp = None
-    animal = json.loads(animal_state)
+    animal = json.loads(animal_state())
     try:
         logger.info("LockerApp: requesting from LockerService")
         resp = requests.get(
