@@ -233,20 +233,20 @@ Update `config/config.json` with
 Launch **HAProxy**
 
 ```bash
-haproxy -f locker_app/haproxy.cfg
+(p36_lockerapp)$ haproxy -f config/haproxy.cfg
 ```
 
-Launch **LockerApp** from two computers (don't forget to have different LockerApp ip in `config/config.json` — they are also written in `locker_app/haproxy.cfg`):
+Launch **LockerApp** from two computers (don't forget to have different LockerApp ip in `config/config.json` — they are also written in `config/haproxy.cfg`):
 
-`python locker_app/app.py`
+`(p36_lockerapp)$ python locker_app/app.py`
 
 Launch **LockerService**:
 
-`python locker_service/locker_service.py`
+`(p36_lockerapp)$ python locker_service/locker_service.py`
 
 Launch **UserService**:
 
-`python user_service/user_service.py`
+`(p36_lockerapp)$ python user_service/user_service.py`
 
 Launch **RabbitMQ cluster** (two nodes from different computers whose ip adresses are specified in `/etc/hosts`):
 
@@ -259,54 +259,54 @@ rabbit02$ rabbitmq-server
 Launch **RabbitMQ receiver** for LockerService:
 
 ``` bash
-python locker_service/rabbitmq_receive_from_user_service.py
+(p36_lockerapp)$ python locker_service/rabbitmq_receive_from_user_service.py
 ```
 
 Launch **MongoDB** with replication: run three separate mongodb servers
 
 ```bash
-mongod --port 27017 --dbpath ./db0 --replSet lockers_rs
-mongod --port 27018 --dbpath ./db1 --replSet lockers_rs
-mongod --port 27019 --dbpath ./db2 --replSet lockers_rs
+(p36_lockerapp)$ mongod --port 27017 --dbpath ./db0 --replSet lockers_rs
+(p36_lockerapp)$ mongod --port 27018 --dbpath ./db1 --replSet lockers_rs
+(p36_lockerapp)$ mongod --port 27019 --dbpath ./db2 --replSet lockers_rs
 ```
 
 Initialize replica set
 
 ``` bash
-python locker_service/mongo_db/migrations/create_lockers_db.py
+(p36_lockerapp)$ python locker_service/mongo_db/migrations/create_lockers_db.py
 ```
 
 ### If you have troubles with creating replica set, run
 
 ``` bash
-mongod --port 27017 --dbpath ./db0 --replSet lockers_rs
+(p36_lockerapp)$ mongod --port 27017 --dbpath ./db0 --replSet lockers_rs
 ```
 
 In another terminal run `mongo` to open MongoDB terminal (when only one mongo node is active).
 Then run `rs.init()`, launch other nodes
 
 ``` bash
-mongod --port 27018 --dbpath ./db1 --replSet lockers_rs
-mongod --port 27019 --dbpath ./db2 --replSet lockers_rs
+(p36_lockerapp)$ mongod --port 27018 --dbpath ./db1 --replSet lockers_rs
+(p36_lockerapp)$ mongod --port 27019 --dbpath ./db2 --replSet lockers_rs
 ```
 
 and add these two members to the replica set by executing
 
 ``` bash
-rs.add("localhost:27018");
-rs.add("localhost:27019");
+(p36_lockerapp)$ rs.add("localhost:27018");
+(p36_lockerapp)$ rs.add("localhost:27019");
 ```
 
 Then run
 
 ``` bash
-python locker_service/mongo_db/migrations/create_lockers_db.py
+(p36_lockerapp)$ python locker_service/mongo_db/migrations/create_lockers_db.py
 ```
 
 without command
 
 ```` bash
-python locker_service/mongo_db/migrations/create_lockers_db.py
+(p36_lockerapp)$ python locker_service/mongo_db/migrations/create_lockers_db.py
 ````
 
 ### Launching with Guake terminal

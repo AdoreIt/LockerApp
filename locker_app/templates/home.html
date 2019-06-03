@@ -5,6 +5,13 @@
 <p>{{animal_name}}</p>
 {% endblock %}
 
+{% block mystery %}
+<form action="" method="post">
+    <input type="submit" value="?" action="/change_animal" method="post" class="btn btn-info text-info"
+        style=" height:10%; font-size: smaller;" name="?">
+</form>
+{% endblock %}
+
 {% block body %}
 <div class=" container">
     <form action="" method="post" role="form">

@@ -17,12 +17,12 @@ guake -e "$anaconda_env_activate && clear"
 guake -e "python user_service/user_service.py"
 
 #create postgres tab
-guake --new-tab $locker_app_path -r "PostgresHazelRabbit"
+guake --new-tab $locker_app_path -r "PostgresHAproxyHazelRabbit"
 guake -e "$anaconda_env_activate && clear"
-guake -e "sudo service postgresql start"
+guake -e "service postgresql start && haproxy -f config/haproxy.cfg"
 
 guake --split-vertical -e "$anaconda_env_activate && clear"
-#guake -e "hazel"
+guake -e "./locker_app/hazelcast_locker_app/bin/stop.sh; ./locker_app/hazelcast_locker_app/bin/start.sh"
 
 guake --split-horizontal -e "$anaconda_env_activate && clear"
 guake -e "rabbitmq-server"
