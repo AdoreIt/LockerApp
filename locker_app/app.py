@@ -56,7 +56,7 @@ def animal_state():
 @app.route('/')
 def home():
     animal = animal_state()
-    print("Animal state: ", animal)
+    logger.debug("Animal state: {}".format(animal))
     resp = make_response(
         render_template(
             "home.html",
@@ -72,7 +72,7 @@ def process_submit():
         logger.info("Processing request to change animal state")
         return change_animal()
     else:
-        logger.info("Provessing request to check user")
+        logger.info("Processing request to check user")
         return check()
 
 
@@ -80,7 +80,7 @@ def change_animal():
     logger.info("Change animal state")
     map.clear()
     animal = animal_state()
-    print("Animal state: ", animal)
+    logger.debug("Animal state: {}".format(animal))
     return redirect(url_for('home'))
 
 
@@ -462,7 +462,7 @@ def users():
                 animal_name=animal["name"])
 
     except Exception as e:
-        logging.critical(e)
+        logger.critical(e)
         error = "Service temporary unavailable. Please, try later"
         return render_template(
             "users.html",
@@ -503,7 +503,7 @@ def lockers():
                 animal_name=animal["name"])
 
     except Exception as e:
-        logging.critical(e)
+        logger.critical(e)
         error = "Service temporary unavailable. Please, try later"
         return render_template(
             "lockers.html",
