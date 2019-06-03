@@ -55,13 +55,10 @@
             </ul>
             <ul class="nav navbar-nav navbar-right" style="text-align:center;">
                 <li class="nav-item">
-                    <form action="" method="post">
-                        <a class="nav-link" href="">
-                            {% block userlogo %}{% endblock %}
-                        </a>
-                        <input type="submit" value="?" action="/change_animal" method="post"
-                            class="btn btn-info text-info" style=" height:10%; font-size: smaller;">
-                    </form>
+                    <a class="nav-link" href="">
+                        {% block userlogo %}{% endblock %}
+                        {% block mystery %}{% endblock %}
+                    </a>
                 </li>
             </ul>
         </div>
