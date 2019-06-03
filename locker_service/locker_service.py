@@ -19,11 +19,11 @@ logger = setup_logger()
 app = Flask(__name__)
 api = Api(app)
 
-
-client = MongoClient('localhost',
-                     replicaSet='lockers_rs',
-                     read_preference=ReadPreference.SECONDARY,
-                     serverSelectionTimeoutMS=10000)
+client = MongoClient(
+    'localhost',
+    replicaSet='lockers_rs',
+    read_preference=ReadPreference.SECONDARY,
+    serverSelectionTimeoutMS=10000)
 lockers_db = client["lockers_db"]
 
 
