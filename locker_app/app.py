@@ -66,6 +66,16 @@ def home():
 
 
 @app.route('/', methods=['POST'])
+def process_submit():
+    logger.info("Processing POST in LockerAPP")
+    if '?' in request.form:
+        logger.info("Processing request to change animal state")
+        return change_animal()
+    else:
+        logger.info("Provessing request to check user")
+        return check()
+
+
 def change_animal():
     logger.info("Change animal state")
     map.clear()
@@ -74,7 +84,6 @@ def change_animal():
     return redirect(url_for('home'))
 
 
-@app.route('/', methods=['POST'])
 def check():
     message = None
     no_user_message = None
