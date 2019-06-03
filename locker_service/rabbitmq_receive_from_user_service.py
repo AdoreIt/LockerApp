@@ -71,7 +71,8 @@ def callback_get(ch, method, properties, body):
                 data=data)
             if resp.status_code == 200:
                 logger.info(
-                    'LockerService RabbitMQ receiver: posted to UserService locker id: {}'.format(data))
+                    'LockerService RabbitMQ receiver: posted to UserService locker id: {}'
+                    .format(data))
                 return
             else:
                 logger.error(
@@ -101,32 +102,39 @@ def callback_free(ch, method, properties, body):
                 data=data)
             if resp.status_code == 200:
                 logger.info(
-                    'LockerService RabbitMQ receiver: posted to UserService: {}'.format(body))
+                    'LockerService RabbitMQ receiver: posted to UserService: {}'
+                    .format(body))
                 return
             else:
-                logger.error('LockerService RabbitMQ receiver: Cannot make POST about free locker')
+                logger.error(
+                    'LockerService RabbitMQ receiver: Cannot make POST about free locker'
+                )
         except Exception as e:
             logger.critical(
-                "LockerService RabbitMQ receiver: Failed to send no lockers {}".format(e))
+                "LockerService RabbitMQ receiver: Failed to send no lockers {}".
+                format(e))
     else:
         logger.warning("Cannot empty locker: DB errors")
         data = {"user_name": body, "locker_id": "locker_db_error"}
         try:
-            logger.info(
-                "LockerService RabbitMQ receiver: trying to post: None")
+            logger.info("LockerService RabbitMQ receiver: trying to post: None")
             resp = post(
                 'http://{}:{}/user_locker'.format(config.user_service_ip,
                                                   config.user_service_port),
                 data=data)
             if resp.status_code == 200:
                 logger.info(
-                    'LockerService RabbitMQ receiver: posted to UserService: None')
+                    'LockerService RabbitMQ receiver: posted to UserService: None'
+                )
                 return
             else:
-                logger.error('LockerService RabbitMQ receiver: Cannot make POST about unable to free up locker')
+                logger.error(
+                    'LockerService RabbitMQ receiver: Cannot make POST about unable to free up locker'
+                )
         except Exception as e:
             logger.critical(
-                "LockerService RabbitMQ receiver: Failed to send no lockers {}".format(e))
+                "LockerService RabbitMQ receiver: Failed to send no lockers {}".
+                format(e))
 
 
 channel.basic_consume(

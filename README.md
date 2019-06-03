@@ -57,6 +57,11 @@ Postgresql
 conda install -c anaconda psycopg2
 ```
 
+HAProxy
+``` bash
+conda install -c bkreider haproxy
+```
+
 ### Databases installation, configuration and creation
 
 #### PostgreSQL
@@ -225,7 +230,13 @@ Update `config/config.json` with
 - ip and host information of services
 - credentials for RabbitMQ user
 
-Launch **LockerApp**:
+Launch **HAProxy**
+
+```bash
+haproxy -f locker_app/haproxy.cfg
+```
+
+Launch **LockerApp** from two computers (don't forget to have different LockerApp ip in `config/config.json` — they are also written in `locker_app/haproxy.cfg`):
 
 `python locker_app/app.py`
 
