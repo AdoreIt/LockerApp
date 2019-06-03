@@ -8,18 +8,22 @@
 {% block body %}
 
 {% if data %}
-<div class="list-group" name="list-group"></div>
-{% for locker_id, is_empty in data.items() %}
+<div class="card-deck text-center justify-content-center" style="margin: auto; ">
+    {% for locker_id, is_empty in data.items() %}
 
-{% if is_empty == True %}
-<p class="list-group-item list-group-item-action list-group-item-success">Locker {{locker_id}}</p>
-{% endif %}
+    {% if is_empty == True %}
+    <div class="card text-white bg-success mb-3" style="min-width: 11rem; max-width: 11rem; min-height: 5rem;">
+        <div class="card-header">Locker {{locker_id}}</div>
+    </div>
+    {% endif %}
 
-{% if is_empty == False %}
-<p class="list-group-item list-group-item-action list-group-item-danger">Locker {{locker_id}}</p>
-{% endif %}
+    {% if is_empty == False %}
+    <div class="card text-white bg-danger mb-3" style="min-width: 11rem;  max-width: 11rem; min-height: 5rem;">
+        <div class="card-header">Locker {{locker_id}}</div>
+    </div>
+    {% endif %}
 
-{% endfor %}
+    {% endfor %}
 </div>
 {% endif %}
 
