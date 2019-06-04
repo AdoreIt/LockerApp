@@ -31,7 +31,7 @@ guake -e "mongod --port 27019 --dbpath ./db2 --replSet lockers_rs"
 
 # create hazelcast and rabbitmq
 guake --new-tab $locker_app_path -r "HazelRabbit"
-# guake -e "hazel"
+guake -e "./locker_app/hazelcast_locker_app/bin/stop.sh; ./locker_app/hazelcast_locker_app/bin/start.sh"
 
 guake --split-vertical 
 guake -e "$anaconda_env_activate  && clear"

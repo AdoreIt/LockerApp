@@ -1,6 +1,9 @@
 # LokerApp
 
-![](https://github.com/AdoreIt/LockerApp/blob/master/doc/LockerApp.gif?raw=true)
+![](doc/LockerApp.gif)
+
+![](doc/LockerApp_user_service_run.gif)
+![](doc/LockerApp_locker_service_run.gif)
 
 - [LokerApp](#lokerapp)
   - [Basic architecture](#basic-architecture)
@@ -18,6 +21,7 @@
         - [Create Database](#create-database-1)
         - [Drop Database](#drop-database-1)
     - [RabbitQM Setup](#rabbitqm-setup)
+    - [Hazelcast](#hazelcast)
   - [Launching](#launching)
     - [If you have troubles with creating replica set, run](#if-you-have-troubles-with-creating-replica-set-run)
     - [Launching with Guake terminal](#launching-with-guake-terminal)
@@ -223,6 +227,12 @@ rabbitmqctl set_permissions -p / <user> ".*" ".*" ".*"
 
 (or set permissions through management website `xxx.xxx.xxx.xxx:15672`)
 
+### Hazelcast
+
+Download Hazelcast zip at https://hazelcast.org/download/
+
+Unzip to `LockerApp/locker_app`
+
 ## Launching
 
 Update `config/config.json` with
@@ -254,6 +264,12 @@ Launch **RabbitMQ cluster** (two nodes from different computers whose ip adresse
 rabbit01$ rabbitmq-server
 
 rabbit02$ rabbitmq-server
+```
+
+Launch **Hazelcast** on two computers:
+
+```bash
+./locker_app/hazelcast_locker_app/bin/stop.sh; ./locker_app/hazelcast_locker_app/bin/start.sh
 ```
 
 Launch **RabbitMQ receiver** for LockerService:

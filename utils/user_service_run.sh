@@ -16,7 +16,7 @@ guake --split-vertical
 guake -e "$anaconda_env_activate && clear"
 guake -e "python user_service/user_service.py"
 
-#create postgres tab
+#create postgres, haproxy, hazelcast, rabbitmq  tab
 guake --new-tab $locker_app_path -r "PostgresHAproxyHazelRabbit"
 guake -e "$anaconda_env_activate && clear"
 guake -e "service postgresql start && haproxy -f config/haproxy.cfg"
