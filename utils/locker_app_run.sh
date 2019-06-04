@@ -3,9 +3,9 @@
 # chmod +x locker_app_run.sh
 
 # change ... to your path
-locker_app_path="$HOME/ipt/10_semester/LockerApp"
+locker_app_path="$HOME/.../LockerApp"
 # change env_name to your env name
-anaconda_env_activate="conda activate p3locker"
+anaconda_env_activate="conda activate p36_lockerapp"
 
 # create locker tab
 guake --new-tab $locker_app_path -r "LockerApp" -e "$anaconda_env_activate  && clear"
